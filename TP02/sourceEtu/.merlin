@@ -1,0 +1,31 @@
+EXCLUDE_QUERY_DIR
+B /applications/opam-2.0.4/default/lib/base
+B /applications/opam-2.0.4/default/lib/base/caml
+B /applications/opam-2.0.4/default/lib/base/shadow_stdlib
+B /applications/opam-2.0.4/default/lib/fieldslib
+B /applications/opam-2.0.4/default/lib/ocaml
+B /applications/opam-2.0.4/default/lib/ppx_compare/runtime-lib
+B /applications/opam-2.0.4/default/lib/ppx_expect/collector
+B /applications/opam-2.0.4/default/lib/ppx_expect/common
+B /applications/opam-2.0.4/default/lib/ppx_expect/config
+B /applications/opam-2.0.4/default/lib/ppx_inline_test/config
+B /applications/opam-2.0.4/default/lib/ppx_inline_test/runtime-lib
+B /applications/opam-2.0.4/default/lib/ppx_sexp_conv/runtime-lib
+B /applications/opam-2.0.4/default/lib/sexplib0
+B _build/default/.rat.objs/byte
+S /applications/opam-2.0.4/default/lib/base
+S /applications/opam-2.0.4/default/lib/base/caml
+S /applications/opam-2.0.4/default/lib/base/shadow_stdlib
+S /applications/opam-2.0.4/default/lib/fieldslib
+S /applications/opam-2.0.4/default/lib/ocaml
+S /applications/opam-2.0.4/default/lib/ppx_compare/runtime-lib
+S /applications/opam-2.0.4/default/lib/ppx_expect/collector
+S /applications/opam-2.0.4/default/lib/ppx_expect/common
+S /applications/opam-2.0.4/default/lib/ppx_expect/config
+S /applications/opam-2.0.4/default/lib/ppx_inline_test/config
+S /applications/opam-2.0.4/default/lib/ppx_inline_test/runtime-lib
+S /applications/opam-2.0.4/default/lib/ppx_sexp_conv/runtime-lib
+S /applications/opam-2.0.4/default/lib/sexplib0
+S .
+FLG -ppx '/home/wbounsid/Bureau/TL/enseeiht-tp-trad-lang/TP02/sourceEtu/_build/default/.ppx/8fcaa93da6a82abb0ff246ce1476d767/ppx.exe --as-ppx --cookie '\''library-name="rat"'\'''
+FLG -open Rat -w -40
