@@ -23,21 +23,23 @@ match e with
         begin
             match chercherGlobalement tds n with
                 | None -> raise (IdentifiantNonDeclare n)
-                | Some ia -> let nle = List.map (analyse_tds_expression tds) le in AppelFonction (ia, nle)
-                        (* begin
-                            match info_ast_to_info ia with 
-                               | InfoFun _ -> 
-                                        let nli = List.map (analyse_tds_instruction tds) li in
-                                        let ia = info_to_info_ast info in 
-                                        AppelFonction (ia, nli)
-                               | _ -> raise (MauvaiseUtilisationIdentifiant n)
-                        end *)
+                | Some ia -> 
+                  begin
+                      match info_ast_to_info ia with
+                        | InfoFun(_) -> let nle = List.map (analyse_tds_expression tds) le in AppelFonction (ia, nle)
+                        | _ -> raise (MauvaiseUtilisationIdentifiant n)
+                  end
          end
     | AstSyntax.Ident (n) ->
         begin
             match chercherGlobalement tds n with
                 | None -> raise (IdentifiantNonDeclare n)
-                | Some ia -> Ident(ia)
+                | Some ia -> 
+                begin
+                  match info_ast_to_info ia with
+                  | InfoFun(_) -> raise (MauvaiseUtilisationIdentifiant n)
+                  | _ -> Ident(ia)
+                end
         end
     | AstSyntax.Rationnel (e1, e2) ->
         begin
@@ -84,7 +86,7 @@ let rec analyse_tds_instruction tds i =
             (* et obtention de l'expression transformée *) 
             let ne = analyse_tds_expression tds e in
             (* Création de l'information associée à l'identfiant *)
-            let info = InfoVar (n,Undefined, 0, "") in
+            let info = InfoVar (n, Undefined, 0, "") in
             (* Création du pointeur sur l'information *)
             let ia = info_to_info_ast info in
             (* Ajout de l'information (pointeur) dans la tds *)
@@ -173,14 +175,16 @@ and analyse_tds_bloc tds li =
   Cette tds est modifiée par effet de bord *)
   List.map (analyse_tds_instruction tdsbloc) li
 
-  let analyse_tds_parametre tds (ptype, pnom) = 
-    match chercherLocalement tds pnom with 
-        | None -> let info  = InfoVar(pnom, ptype, 0, "") in
-                  let ia = info_to_info_ast info in
-                  ajouter tds pnom ia;
-                  (ptype, ia)
-                  
-        | Some _ -> raise (DoubleDeclaration pnom)
+let analyse_tds_parametre tds (ptype, pnom) = 
+  match chercherLocalement tds pnom with 
+    | None -> 
+      begin
+        let info  = InfoVar(pnom, ptype, 0, "") in
+        let ia = info_to_info_ast info in
+        ajouter tds pnom ia;
+        (ptype, ia)
+      end      
+    | Some _ -> raise (DoubleDeclaration pnom)
 
 (* analyse_tds_fonction : AstSyntax.fonction -> AstTds.fonction *)
 (* Paramètre tds : la table des symboles courante *)
@@ -188,18 +192,19 @@ and analyse_tds_bloc tds li =
 (* Vérifie la bonne utilisation des identifiants et tranforme la fonction
 en une fonction de type AstTds.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li,e))  =
+let rec analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li,e))  =
   begin
     match chercherLocalement maintds n with 
     | None -> 
       begin
         let tdsfonc = creerTDSFille maintds in 
-        let nli = List.map (analyse_tds_instruction tdsfonc) li in
         let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-        let ne = analyse_tds_expression tdsfonc e in 
         let info = InfoFun(n, t, (fst (List.split lp))) in 
-        let ia = info_to_info_ast info in 
+        let ia = info_to_info_ast info in
+        ajouter tdsfonc n ia;
+        let nli = List.map (analyse_tds_instruction tdsfonc) li in
         ajouter maintds n ia;
+        let ne = analyse_tds_expression tdsfonc e in 
         Fonction(t, ia, nlp , nli, ne)
       end
     | Some _ -> raise (DoubleDeclaration n)
@@ -212,6 +217,8 @@ let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li,e))  =
 en un programme de type AstTds.ast *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let analyser (AstSyntax.Programme (fonctions,prog)) =
-  let tds_mere = creerTDSMere ()
-  (* à compléter *)
+  let tds_mere = creerTDSMere () in 
+  let nfonctions = List.map (analyse_tds_fonction tds_mere) fonctions in 
+  let nbloc = List.map (analyse_tds_instruction tds_mere) prog in
+  Programme (nfonctions, nbloc)
 end

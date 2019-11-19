@@ -10,7 +10,6 @@ let%test_unit "testDoubleDeclarationVariable1" =
   with
   | DoubleDeclaration("x") -> ()
 	
-(* 
   let%test_unit "testDoubleDeclarationVariable2" = 
   let _ = compiler "../../fichiersRat/src-rat-tds-test/testDoubleDeclarationVariable2.rat" in ()
   
@@ -341,4 +340,3 @@ let%test_unit "code_testfuns" =
 
 let%test_unit "code_complique" = 
   let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
-*)
