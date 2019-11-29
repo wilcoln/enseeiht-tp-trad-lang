@@ -56,7 +56,7 @@ let string_of_info info =
 let afficher_locale tds =
   match tds with
   | Nulle -> print_newline ()
-  |Courante (_,c) -> Hashtbl.iter ( fun n info -> (print_string (n^" : "^(string_of_info (info_ast_to_info info))^"\n"))) c
+  | Courante (_,c) -> Hashtbl.iter ( fun n info -> (print_string (n^" : "^(string_of_info (info_ast_to_info info))^"\n"))) c
 
 
 let afficher_globale tds =

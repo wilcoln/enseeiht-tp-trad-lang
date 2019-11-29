@@ -45,29 +45,29 @@ match e with
         begin
             let (texp1, ne1) = analyse_type_expression  e1 in
             let (texp2, ne2) = analyse_type_expression  e2 in
-            if (est_compatible texp1 Int) && (est_compatible texp2 Int) 
-            then 
-              (Rat, Rationnel (ne1, ne2))
-            else 
-              raise (TypeInattendu (texp1, texp2))
+            match (texp1, texp2) with 
+            | (Int, Rat) -> raise (TypeInattendu (Rat, Int))
+            | (Bool, Int) -> raise (TypeInattendu (Bool, Int))
+            | (Int, Int) -> (Rat, Rationnel(ne1, ne2))
+            | _ -> raise (TypeInattendu (texp1, texp2))    
         end
     | AstTds.Numerateur (e) -> 
         begin
             let (texp, ne) = analyse_type_expression e in
-            if (est_compatible texp Int)
+            if est_compatible texp Rat
             then 
               (Int, Numerateur (ne))
             else 
-              raise (TypeInattendu (Int, texp))
+              raise (TypeInattendu (texp, Rat))
         end
     | AstTds.Denominateur (e) ->
         begin
           let (texp, ne) = analyse_type_expression e in
-          if (est_compatible texp Int)
+          if est_compatible texp Rat
           then 
             (Int, Denominateur (ne))
           else 
-            raise (TypeInattendu (Int, texp))
+            raise (TypeInattendu (texp, Rat))
         end
     | AstTds.True -> (Bool, True)
     | AstTds.False -> (Bool, False)
@@ -102,7 +102,7 @@ match e with
             begin
               if est_compatible texp1 Int && est_compatible texp2 Int
               then 
-                (Int, Binaire (Inf, ne1,  ne2))
+                (Bool, Binaire (Inf, ne1,  ne2))
               else 
                 raise (TypeBinaireInattendu (Inf, texp1, texp2)) 
             end
@@ -123,7 +123,7 @@ let rec analyse_type_instruction  i =
           let _ = modifier_type_info t ia in 
           Declaration (ne, ia)
         else 
-          raise (TypeInattendu (t, texp))
+          raise (TypeInattendu (texp, t))
       end
   | AstTds.Affectation (e, ia) ->
       begin
@@ -134,14 +134,14 @@ let rec analyse_type_instruction  i =
             if est_compatible t texp then
                   Affectation (ne, ia)
             else 
-              raise (TypeInattendu (t, texp))
+              raise (TypeInattendu (texp, t))
           end
           | _ -> failwith "erreur affectation"
       end
   | AstTds.Affichage e -> 
       (* Vérification de la bonne utilisation des identifiants dans l'expression *)
       (* et obtention de l'expression transformée *)
-      let (texp, ne) = analyse_type_expression  e in 
+      let (texp, ne) = analyse_type_expression e in 
         begin
           match texp with 
           | Int -> AffichageInt ne
@@ -151,13 +151,13 @@ let rec analyse_type_instruction  i =
         end
   | AstTds.Conditionnelle (c, bthen,belse) -> 
       (* Analyse de la condition *)
-      let (texp, nc) = analyse_type_expression  c in 
+      let (texp, nc) = analyse_type_expression c in 
       if est_compatible Bool texp then
         let nbthen = analyse_type_bloc bthen in
         let nbelse = analyse_type_bloc belse in
         Conditionnelle(nc, nbthen, nbelse)
       else 
-        raise (TypeInattendu (Bool, texp))
+        raise (TypeInattendu (texp, Bool))
   | AstTds.TantQue (c, b) -> 
       (* Analyse de la condition *)
       let (texp, nc) = analyse_type_expression  c in 
@@ -165,7 +165,7 @@ let rec analyse_type_instruction  i =
         let nb = analyse_type_bloc  b in
         TantQue(nc, nb)
       else 
-        raise (TypeInattendu (Bool, texp))
+        raise (TypeInattendu (texp, Bool))
   | AstTds.Empty -> Empty
 
       
@@ -188,14 +188,14 @@ en une fonction de type AstType.fonction *)
 let rec analyse_type_fonction (AstTds.Fonction(t,ia,lp,li,e))  =
   begin
     (* Analyse de la condition *)
-    let (texp, ne) = analyse_type_expression  e in 
+    let (texp, ne) = analyse_type_expression e in 
     if est_compatible t texp then
         let nlp = List.map analyse_type_parametre lp in
         let nli = List.map analyse_type_instruction li in
         modifier_type_fonction_info t (fst (List.split nlp)) ia;
         Fonction(ia, snd (List.split nlp), nli, ne)
     else 
-      raise (TypeInattendu (t, texp))
+      raise (TypeInattendu (texp, t))
   end
   
 

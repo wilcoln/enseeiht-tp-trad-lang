@@ -3,7 +3,6 @@ open Exceptions
 
 exception ErreurNonDetectee
 
-
 let%test_unit "testDeclaration1"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testDeclaration1.rat" in ()
 
@@ -263,7 +262,7 @@ let%test_unit "testDenominateur5"=
     in raise ErreurNonDetectee
   with
   | TypeInattendu(Int,Bool) -> ()
-
+  
 let%test_unit "testIdent1"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testIdent1.rat" in ()
 
@@ -374,9 +373,10 @@ let%test_unit "testOperation12"=
 let%test_unit "testAppel1"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testAppel1.rat" in ()
 
+
 let%test_unit "testAppel2"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testAppel2.rat" in ()
-
+    (*
 let%test_unit "testAppel3"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testAppel3.rat" in ()
 
@@ -523,3 +523,4 @@ let _ = compiler   "../../fichiersRat/src-rat-tam-test/testfuns.rat" in ()
 
 let%test_unit "code_complique" = 
 let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
+*)
