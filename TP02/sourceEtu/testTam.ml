@@ -1,7 +1,7 @@
 open Compilateur
 
 (* Changer le chemin d'accès du jar. *)
-let runtamcmde = "java -jar ../../../../../tools/runtam/runtam.jar"
+let runtamcmde = "java -jar ../../runtam.jar"
 (* let runtamcmde = "java -jar /mnt/n7fs/.../tools/runtam/runtam.jar" *)
 
 (* read up to maxlen characters from the input channel. *)
@@ -50,7 +50,7 @@ let runtam ratfile =
   print_string (runtamcode runtamcmde ratfile)
 
 (* requires ppx_expect in jbuild, and `opam install ppx_expect` *)
-(*
+
 let%expect_test "testprintint" =
   runtam "../../fichiersRat/src-rat-tam-test/testprintint.rat";
   [%expect{| 42 |}]
@@ -130,4 +130,3 @@ let%expect_test "factfuns" =
 let%expect_test "factrec" =
   runtam "../../fichiersRat/src-rat-tam-test/factrec.rat";
   [%expect{| 120 |}]
-*)

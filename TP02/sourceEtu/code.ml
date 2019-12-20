@@ -82,7 +82,6 @@ CALL (ST) norm
 POP (2) 4
 RETURN (2) 4\n\n"
 
-
 let sout = 
   "SOut ; affiche une chaîne de caracteres dont l'adresse dans le tas est en -1[LB]
   LOAD (1) -1[LB] ; adresse dans le tas de la chaine en sommet de pile

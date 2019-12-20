@@ -46,8 +46,6 @@ match e with
             let (texp1, ne1) = analyse_type_expression  e1 in
             let (texp2, ne2) = analyse_type_expression  e2 in
             match (texp1, texp2) with 
-            | (Int, Rat) -> raise (TypeInattendu (Rat, Int))
-            | (Bool, Int) -> raise (TypeInattendu (Bool, Int))
             | (Int, Int) -> (Rat, Rationnel(ne1, ne2))
             | _ -> raise (TypeInattendu (texp1, texp2))    
         end

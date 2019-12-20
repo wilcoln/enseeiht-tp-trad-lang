@@ -86,7 +86,7 @@ let rec analyse_tds_instruction tds i =
             (* et obtention de l'expression transformée *) 
             let ne = analyse_tds_expression tds e in
             (* Création de l'information associée à l'identfiant *)
-            let info = InfoVar (n, Undefined, 0, "") in
+            let info = InfoVar (n, t, 0, "") in
             (* Création du pointeur sur l'information *)
             let ia = info_to_info_ast info in
             (* Ajout de l'information (pointeur) dans la tds *)
@@ -180,9 +180,9 @@ let analyse_tds_parametre tds (ptype, pnom) =
     | None -> 
       begin
         let info  = InfoVar(pnom, ptype, 0, "") in
-        let ia = info_to_info_ast info in
-        ajouter tds pnom ia;
-        (ptype, ia)
+        let pia = info_to_info_ast info in
+        ajouter tds pnom pia;
+        (ptype, pia)
       end      
     | Some _ -> raise (DoubleDeclaration pnom)
 
@@ -202,8 +202,8 @@ let rec analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li,e))  =
         let info = InfoFun(n, t, (fst (List.split lp))) in 
         let ia = info_to_info_ast info in
         ajouter tdsfonc n ia;
-        let nli = List.map (analyse_tds_instruction tdsfonc) li in
         ajouter maintds n ia;
+        let nli = List.map (analyse_tds_instruction tdsfonc) li in
         let ne = analyse_tds_expression tdsfonc e in 
         Fonction(t, ia, nlp , nli, ne)
       end

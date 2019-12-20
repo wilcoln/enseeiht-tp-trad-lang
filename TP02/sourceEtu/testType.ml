@@ -193,7 +193,7 @@ let%test_unit "testRationnel3"=
     let _ = compiler "../../fichiersRat/src-rat-type-test/testRationnel3.rat"
     in raise ErreurNonDetectee
   with
-  | TypeInattendu(Rat,Int) -> ()
+  | TypeInattendu(Int,Rat) -> ()
 
 let%test_unit "testRationnel4"= 
   try 
@@ -376,7 +376,7 @@ let%test_unit "testAppel1"=
 
 let%test_unit "testAppel2"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testAppel2.rat" in ()
-    (*
+
 let%test_unit "testAppel3"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testAppel3.rat" in ()
 
@@ -523,4 +523,3 @@ let _ = compiler   "../../fichiersRat/src-rat-tam-test/testfuns.rat" in ()
 
 let%test_unit "code_complique" = 
 let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
-*)

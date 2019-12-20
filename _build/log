@@ -1,0 +1,4 @@
+# dune runtest
+# OCAMLPARAM: unset
+$ /usr/bin/nproc > /tmp/dune0b42e9.output 2> /dev/null
+$ /usr/bin/ocamlc.opt -config > /tmp/dune7f952b.output
