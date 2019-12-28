@@ -105,7 +105,7 @@ let%expect_test "factiter" =
 
 let%expect_test "complique" =
   runtam "../../fichiersRat/src-rat-tam-test/complique.rat";
-  [%expect{| [9/4][27/14][27/16][3/2] |}]
+  [%expect{| [9/4][27/14][27/16][3/2] |}] 
 
 let%expect_test "factfun1" =
   runtam "../../fichiersRat/src-rat-tam-test/testfun1.rat";
@@ -123,9 +123,11 @@ let%expect_test "factfun4" =
   runtam "../../fichiersRat/src-rat-tam-test/testfun4.rat";
   [%expect{| 10 |}]
 
+
 let%expect_test "factfuns" =
   runtam "../../fichiersRat/src-rat-tam-test/testfuns.rat";
   [%expect{| 28 |}]
+
 
 let%expect_test "factrec" =
   runtam "../../fichiersRat/src-rat-tam-test/factrec.rat";
