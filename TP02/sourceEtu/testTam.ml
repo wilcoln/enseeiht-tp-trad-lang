@@ -50,7 +50,7 @@ let runtam ratfile =
   print_string (runtamcode runtamcmde ratfile)
 
 (* requires ppx_expect in jbuild, and `opam install ppx_expect` *)
-(* 
+
 let%expect_test "testprintint" =
   runtam "../../fichiersRat/src-rat-tam-test/testprintint.rat";
   [%expect{| 42 |}]
@@ -132,9 +132,14 @@ let%expect_test "factfuns" =
 
 let%expect_test "factrec" =
   runtam "../../fichiersRat/src-rat-tam-test/factrec.rat";
-  [%expect{| 120 |}] *)
+  [%expect{| 120 |}]
 
   let%expect_test "pointeurs" =
   runtam "../../fichiersRat/testPointeurs.rat";
 
   [%expect{| 5 |}]
+
+let%expect_test "chaines" =
+  runtam "../../fichiersRat/testChaines.rat";
+
+  [%expect{| fin |}]

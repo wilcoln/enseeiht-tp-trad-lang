@@ -528,3 +528,7 @@ let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
 
 let%test_unit "code_pointeurs" = 
   let _ = compiler   "../../fichiersRat/testPointeurs.rat" in ()
+
+(* Fichiers de tests de l'intégration des chaines -> doivent passer lae *)
+let%test_unit "code_string" = 
+let _ = compiler   "../../fichiersRat/testChaines.rat" in ()

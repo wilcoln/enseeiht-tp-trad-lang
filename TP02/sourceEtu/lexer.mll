@@ -41,13 +41,15 @@ rule token = parse
 | "new"     {NEW}
 | "&"       {AMP}
 | "null"    {NULL}
+| "string"  {STRING}
+| "^"       {CARAT}
+| ","       {COMMA}
+| "length"  {LENGTH}
 
-| ['0'-'9']+ as i
-    { ENTIER (int_of_string i) }
-| ['a'-'z'](['A'-'Z''a'-'z''0'-'9']|"-"|"_")* as n
-    { ID n }
-| eof
-    { EOF }
+| ['0'-'9']+ as i   { ENTIER (int_of_string i) }
+| ['a'-'z'](['A'-'Z''a'-'z''0'-'9']|"-"|"_")* as n  { ID n }
+| "\""(['A'-'Z''a'-'z''0'-'9']|"-"|"_"|"\\n")*"\"" as s  { CHAINE s }
+| eof   { EOF }
 | _
 { raise (Error ("Unexpected char: "^(Lexing.lexeme lexbuf)^" at "^(string_of_int (Lexing.lexeme_start
 lexbuf))^"-"^(string_of_int (Lexing.lexeme_end lexbuf)))) }

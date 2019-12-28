@@ -87,6 +87,15 @@ match e with
     | AstSyntax.True -> True
     | AstSyntax.False -> False
     | AstSyntax.Entier (i) -> Entier (i)
+    | AstSyntax.Chaine (s) -> Chaine (s)
+    | AstSyntax.Longueur (e) -> let ne = analyse_tds_expression tds e in Longueur (ne)
+    | AstSyntax.SousChaine (e1,e2,e3) ->
+        begin
+          let ne1 = analyse_tds_expression tds e1 in 
+          let ne2 = analyse_tds_expression tds e2 in
+          let ne3 = analyse_tds_expression tds e3 in 
+          SousChaine(ne1, ne2, ne3)
+        end
     | AstSyntax.Binaire (op_binaire, e1, e2) ->
         begin
             let ne1 = analyse_tds_expression tds e1 in

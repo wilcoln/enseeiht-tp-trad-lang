@@ -1,5 +1,5 @@
 open Type
-
+open String
 (* Interface des arbres abstraits *)
 module type Ast =
 sig
@@ -44,7 +44,7 @@ module AstSyntax =
 struct
 
 (* Opérateurs binaires de Rat *)
-type binaire = Plus | Mult | Equ | Inf
+type binaire = Plus | Mult | Equ | Inf | Concat
 
 (* Affectables de Rat *)
 type affectable = 
@@ -76,6 +76,10 @@ type expression =
   | False
   (* Entier *)
   | Entier of int
+  (* String *)
+  | Chaine of string
+  | SousChaine of expression * expression * expression
+  | Longueur of expression
   (* Opération binaire représentée par l'opérateur, l'opérande gauche et l'opérande droite *)
   | Binaire of binaire * expression * expression
   
@@ -121,6 +125,7 @@ struct
     | Mult -> "* "
     | Equ -> "= "
     | Inf -> "< "
+    | Concat -> "^ "
 
   (* Conversion des affectables *)
   let rec string_of_affectable a =
@@ -141,6 +146,9 @@ struct
     | True -> "true "
     | False -> "false "
     | Entier i -> (string_of_int i)^" "
+    | Chaine s -> "chaine "^s^" "
+    | SousChaine (e1,e2,e3) -> "sous chaine "^(string_of_expression e1)^" "^(string_of_expression e2)^" "^(string_of_expression e3)^" "
+    | Longueur e -> "longueur "^(string_of_expression e)^" "
     | Binaire (b,e1,e2) -> (string_of_expression e1)^(string_of_binaire b)^(string_of_expression e2)^" "
 
   (* Conversion des instructions *)
@@ -203,6 +211,9 @@ struct
     | True
     | False
     | Entier of int
+    | Chaine of string
+    | SousChaine of expression * expression * expression
+    | Longueur of expression
     | Binaire of AstSyntax.binaire * expression * expression
 
   (* instructions existantes dans notre langage *)
@@ -237,7 +248,7 @@ module AstType =
 struct
 
 (* Opérateurs binaires existants dans Rat - résolution de la surcharge *)
-type binaire = PlusInt | PlusRat | MultInt | MultRat | EquInt | EquBool | Inf
+type binaire = PlusInt | PlusRat | MultInt | MultRat | EquInt | EquBool | Inf | Concat
 
 (* Affectables existantes dans Rat *)
 (* = affectables de AstTds *)
@@ -260,6 +271,9 @@ type expression =
   | True
   | False
   | Entier of int
+  | Chaine of string
+  | SousChaine of expression * expression * expression
+  | Longueur of expression
   | Binaire of binaire * expression * expression
 
 (* instructions existantes Rat *)
@@ -268,10 +282,11 @@ type expression =
 type bloc = instruction list
  and instruction =
   | Declaration of expression * Tds.info_ast
-  | Affectation of  affectable * expression
+  | Affectation of affectable * expression
   | AffichageInt of expression
   | AffichageRat of expression
   | AffichageBool of expression
+  | AffichageString of expression
   | Conditionnelle of expression * bloc * bloc
   | TantQue of expression * bloc
   | Empty (* les nœuds ayant disparus: Const *)

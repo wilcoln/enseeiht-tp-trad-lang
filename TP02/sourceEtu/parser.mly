@@ -9,6 +9,7 @@ open Ast.AstSyntax
 
 %token <int> ENTIER
 %token <string> ID
+%token <string> CHAINE
 %token RETURN
 %token PV
 %token AO
@@ -38,6 +39,10 @@ open Ast.AstSyntax
 %token NULL
 %token NEW
 %token AMP
+%token STRING
+%token CARAT
+%token COMMA
+%token LENGTH
 %token EOF
 
 (* Type de l'attribut synthétisé des non-terminaux *)
@@ -87,6 +92,7 @@ typ :
 | BOOL              {Bool}
 | INT               {Int}
 | RAT               {Rat}
+| STRING            {String}
 | tp=typ MULT       {Pointeur(tp)}
 
 e : 
@@ -97,10 +103,14 @@ e :
 | TRUE                    {True}
 | FALSE                   {False}
 | e=ENTIER                {Entier e}
+| s=CHAINE                {let trimStr = (String.sub s 1 ((String.length s)-2)) in Chaine trimStr}
+| PO e1=e AO e2=e COMMA e3=e AF PF {SousChaine (e1,e2,e3)}
+| LENGTH e1=e             {Longueur (e1)}
 | PO e1=e PLUS e2=e PF    {Binaire (Plus,e1,e2)}
 | PO e1=e MULT e2=e PF    {Binaire (Mult,e1,e2)}
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
+| PO e1=e CARAT e2=e PF   {Binaire (Concat,e1,e2)}
 | a1=a                    {Affectable (a1)} (* TODO revenir dessus *)
 | NULL                    {Null}
 | PO NEW tp=typ PF        {New (tp)}

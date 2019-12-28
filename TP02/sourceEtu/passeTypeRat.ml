@@ -96,6 +96,28 @@ match e with
     | AstTds.True -> (Bool, True)
     | AstTds.False -> (Bool, False)
     | AstTds.Entier (i) -> (Int, Entier (i))
+    | AstTds.Chaine s -> (String, Chaine s)
+    | AstTds.SousChaine (e1, e2, e3) ->
+        begin 
+          let (t1, ne1) = analyse_type_expression e1 in 
+          let (t2, ne2) = analyse_type_expression e2 in 
+          let (t3, ne3) = analyse_type_expression e3 in 
+          if est_compatible t1 String then 
+            begin
+              match t2, t3 with 
+              | Int, Int -> (String, SousChaine (ne1, ne2, ne3))
+              | _ -> failwith "types indices inattendus"
+            end
+          else raise (TypeInattendu (t1, String))
+          
+        end
+    | AstTds.Longueur e -> 
+        begin 
+          let (te, ne) = analyse_type_expression e in 
+          if est_compatible String te 
+            then (Int, Longueur (ne)) 
+          else raise (TypeInattendu (te, String))
+        end
     | AstTds.Binaire (op_binaire, e1, e2) ->
         begin
           let (texp1, ne1) = analyse_type_expression  e1 in
@@ -129,6 +151,14 @@ match e with
                 (Bool, Binaire (Inf, ne1,  ne2))
               else 
                 raise (TypeBinaireInattendu (Inf, texp1, texp2)) 
+            end
+          | Concat -> 
+            begin
+              if est_compatible texp1 String && est_compatible texp2 String
+              then 
+                (String, Binaire (Concat, ne1,  ne2))
+              else 
+                raise (TypeBinaireInattendu (Concat, texp1, texp2)) 
             end
         end
     
@@ -167,6 +197,7 @@ let rec analyse_type_instruction  i =
           | Int -> AffichageInt ne
           | Rat -> AffichageRat ne
           | Bool -> AffichageBool ne
+          | String -> AffichageString ne
           | _ -> raise TypeIndefini
         end
   | AstTds.Conditionnelle (c, bthen,belse) -> 

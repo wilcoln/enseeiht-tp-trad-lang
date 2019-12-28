@@ -1,5 +1,5 @@
 (* Types manipulés dans Rat *)
-type typ = Bool | Int | Rat | Pointeur of typ | Undefined
+type typ = Bool | Int | Rat | String | Pointeur of typ | Undefined
 
 
 (* string_of_type :  typ -> string *)

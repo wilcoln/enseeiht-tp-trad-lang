@@ -17,16 +17,16 @@ struct
   let rec taille_type_pointe a = 
     match a with 
     |  Ident (ia) -> 
-    begin
-    match info_ast_to_info ia with
-      | InfoVar(n, t, base, reg) -> 
-        begin
-          match t with 
-          | Pointeur (tp) -> getTaille tp
-          | _ -> failwith "pas un pointeur"
-        end
-      | _ -> failwith "pas un pointeur"
-    end
+      begin
+      match info_ast_to_info ia with
+        | InfoVar(n, t, base, reg) -> 
+          begin
+            match t with 
+            | Pointeur (tp) -> getTaille tp
+            | _ -> failwith "pas un pointeur"
+          end
+        | _ -> failwith "pas un pointeur"
+      end
   | Contenu (a) -> taille_type_pointe a
   
   let rec analyse_code_affectable a  = 
@@ -89,6 +89,9 @@ struct
     | True -> "LOADL 1\nSUBR I2B\n"
     | False -> "LOADL 0\nSUBR I2B\n"
     | Entier (i) -> "LOADL "^(string_of_int i)^"\n"
+    | Chaine s -> "" (* TODO *)
+    | SousChaine (e1, e2, e3) -> "" (* TODO *)
+    | Longueur e -> "" (*TODO*)
     | Binaire (b, e1, e2) -> 
       begin
         let c1 = analyse_code_expression e1 in 
@@ -101,6 +104,7 @@ struct
         | EquBool -> c1^c2^"SUBR BAnd\n"^c1^"SUBR BNeg\n"^c2^"SUBR BNeg\n"^"SUBR BAnd\n"^"SUBR BOr\n"
         | EquInt -> c1^c2^"SUBR IEq\n"
         | Inf -> c1^c2^"SUBR ILss\n"
+        | Concat -> c1^c2^"CALL (SB) SOut\n"
       end
 
   let rec analyse_code_bloc b = 
