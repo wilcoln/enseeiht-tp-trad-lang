@@ -3,7 +3,7 @@ open Exceptions
 
 exception ErreurNonDetectee;;
 
-(*
+
 let%test_unit "testDoubleDeclarationVariable1" = 
   try 
     let _ = compiler "../../fichiersRat/src-rat-tds-test/testDoubleDeclarationVariable1.rat"
@@ -341,4 +341,8 @@ let%test_unit "code_testfuns" =
 
 let%test_unit "code_complique" = 
   let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
-  *)
+ 
+(* Fichiers de tests de l'intégration des pointeurs -> doivent passer la TDS *)
+
+let%test_unit "code_pointeurs" = 
+  let _ = compiler   "../../fichiersRat/testPointeurs.rat" in ()

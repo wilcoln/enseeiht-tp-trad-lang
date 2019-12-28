@@ -1,18 +1,20 @@
-type typ = Bool | Int | Rat | Undefined
+type typ = Bool | Int | Rat | Pointeur of typ | Undefined
 
-let string_of_type t = 
+let rec string_of_type t = 
   match t with
   | Bool ->  "Bool"
   | Int  ->  "Int"
   | Rat  ->  "Rat"
+  | Pointeur (tp) -> "Pointeur de "^(string_of_type tp)
   | Undefined -> "Undefined"
 
 
-let est_compatible t1 t2 =
+let rec est_compatible t1 t2 =
   match t1, t2 with
   | Bool, Bool -> true
   | Int, Int -> true
   | Rat, Rat -> true 
+  | Pointeur (tp1), Pointeur (tp2) -> est_compatible tp1 tp2
   | _ -> false 
 
 let est_compatible_list lt1 lt2 =
@@ -23,6 +25,7 @@ let est_compatible_list lt1 lt2 =
 let getTaille t =
   match t with
   | Int -> 1
+  | Pointeur (_) -> 1
   | Bool -> 1
   | Rat -> 2
   | Undefined -> 0

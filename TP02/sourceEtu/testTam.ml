@@ -1,4 +1,4 @@
-open Compilateur
+(* open Compilateur
 
 (* Changer le chemin d'accès du jar. *)
 let runtamcmde = "java -jar ../../runtam.jar"
@@ -131,4 +131,4 @@ let%expect_test "factfuns" =
 
 let%expect_test "factrec" =
   runtam "../../fichiersRat/src-rat-tam-test/factrec.rat";
-  [%expect{| 120 |}]
+  [%expect{| 120 |}] *)

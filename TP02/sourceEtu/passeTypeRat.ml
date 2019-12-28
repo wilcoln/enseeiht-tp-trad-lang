@@ -1,4 +1,4 @@
-(* Module de la passe de gestion des types *)
+(* (* Module de la passe de gestion des types *)
 module PasseTypeRat : Passe.Passe with type t1 = Ast.AstTds.programme and type t2 = Ast.AstType.programme =
 struct
 
@@ -206,4 +206,4 @@ let analyser (AstTds.Programme (fonctions,prog)) =
   let nlf = List.map analyse_type_fonction fonctions in 
   let nb = List.map analyse_type_instruction prog in
   Programme (nlf, nb)
-end
+end *)

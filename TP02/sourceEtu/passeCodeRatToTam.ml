@@ -1,4 +1,4 @@
-(* Module de la passe de gestion des types *)
+(* (* Module de la passe de gestion des types *)
 module PasseCodeRatToTam : Passe.Passe with type t1 = Ast.AstPlacement.programme and type t2 = string =
 struct
 
@@ -133,4 +133,4 @@ let analyser (Programme (fonctions, prog)) =
   let code_tam = code_fonctions^label_main^"\n"^code_programme^"\nHALT" in 
   let _ = ecrireFichier "output.tam" code_tam in
   (getEntete () )^code_tam
-end
+end *)
