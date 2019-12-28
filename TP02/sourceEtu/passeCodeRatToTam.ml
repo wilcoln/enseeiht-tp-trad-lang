@@ -1,4 +1,4 @@
-(* (* Module de la passe de gestion des types *)
+(* Module de la passe de gestion des types *)
 module PasseCodeRatToTam : Passe.Passe with type t1 = Ast.AstPlacement.programme and type t2 = string =
 struct
 
@@ -12,7 +12,37 @@ struct
 
   type t1 = Ast.AstPlacement.programme
   type t2 = string
- 
+
+
+  let rec taille_type_pointe a = 
+    match a with 
+    |  Ident (ia) -> 
+    begin
+    match info_ast_to_info ia with
+      | InfoVar(n, t, base, reg) -> 
+        begin
+          match t with 
+          | Pointeur (tp) -> getTaille tp
+          | _ -> failwith "pas un pointeur"
+        end
+      | _ -> failwith "pas un pointeur"
+    end
+  | Contenu (a) -> taille_type_pointe a
+  
+  let rec analyse_code_affectable a  = 
+    match a with 
+    | Ident (ia) -> 
+      begin
+      match info_ast_to_info ia with
+        | InfoVar(n, t, base, reg) -> "LOAD ("^(string_of_int (getTaille t))^") "^(string_of_int base)^"["^reg^"]\n" 
+        | InfoConst(n, v) -> "LOADL "^(string_of_int v)^"\n"
+        | _ -> failwith "erreur generation code identifiant"
+      end
+    | Contenu (a) ->
+      begin 
+        let ca = analyse_code_affectable a in ca
+      end
+
   let rec analyse_code_expression e = 
     match e with 
     | AppelFonction(ia, le) -> 
@@ -25,13 +55,21 @@ struct
             end
           | _ -> failwith "erreur generation code appel fonction"
       end
-    | Ident (ia) -> 
-      begin
-      match info_ast_to_info ia with
-        | InfoVar(n, t, base, reg) -> "LOAD ("^(string_of_int (getTaille t))^") "^(string_of_int base)^"["^reg^"]\n" 
-        | InfoConst(n, v) -> "LOADL "^(string_of_int v)^"\n"
-        | _ -> failwith "erreur generation code identifiant"
-      end
+      | Affectable a -> 
+        begin
+          let ca = analyse_code_affectable a in 
+          match a with 
+          | Ident (ia) -> ca
+          | Contenu (a) -> let ttp = taille_type_pointe a in ca^"LOADI ("^(string_of_int ttp)^")\n"
+        end
+      | Null -> "SUBR Mvoid\n"
+      | New (tp) -> "LOADL "^(string_of_int (getTaille tp))^"\nSUBR Malloc\n"
+      | Adresse (ia) -> 
+           begin 
+            match info_ast_to_info ia with 
+            | InfoVar(n, t, base, reg) -> "LOADA "^(string_of_int base)^"["^reg^"]\n"
+            | _ -> failwith "erreur"
+           end
     | Rationnel (e1, e2) -> 
       begin
         let c1 = analyse_code_expression e1 in 
@@ -81,15 +119,22 @@ and analyse_code_instruction i =
               end
           | _ -> failwith "erreur generation code instruction"
         end
-    | Affectation (e, ia) ->
+    | Affectation (a, e) ->
         begin
-          match info_ast_to_info ia with 
-          | InfoVar (_, t, base, reg) -> 
+          let ca = analyse_code_affectable a in
+          let ce = analyse_code_expression e in 
+          match a with
+          | Ident(ia) ->
             begin
-              let ce = analyse_code_expression e in
-              ce^"STORE ("^(string_of_int (getTaille t))^") "^(string_of_int base)^"["^reg^"]\n"
+              match info_ast_to_info ia with 
+              | InfoVar (_, t, base, reg) -> ce^"STORE ("^(string_of_int (getTaille t))^") "^(string_of_int base)^"["^reg^"]\n"
+              | _ -> ""
             end
-          | _ -> ""
+          | Contenu (pa) -> 
+            begin 
+              let ttp = taille_type_pointe pa in 
+              ce^ca^"STOREI ("^(string_of_int ttp)^")\n"
+            end
         end
     | AffichageInt e -> let ce = analyse_code_expression e in ce^"SUBR IOut\n"
     | AffichageRat e -> let ce = analyse_code_expression e in ce^"CALL (SB) ROut\n"
@@ -133,4 +178,4 @@ let analyser (Programme (fonctions, prog)) =
   let code_tam = code_fonctions^label_main^"\n"^code_programme^"\nHALT" in 
   let _ = ecrireFichier "output.tam" code_tam in
   (getEntete () )^code_tam
-end *)
+end

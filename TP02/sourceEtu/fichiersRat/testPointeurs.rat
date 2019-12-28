@@ -3,5 +3,8 @@ int * px = (new int);
 int x = 3;
 px = &x;
 int y = (*px);
-print y;
+(*px) = 5;
+int z = (*px);
+
+print z;
 }

@@ -1,4 +1,4 @@
-(* open Compilateur
+open Compilateur
 open Exceptions
 
 exception ErreurNonDetectee
@@ -522,4 +522,9 @@ let%test_unit "code_testfuns" =
 let _ = compiler   "../../fichiersRat/src-rat-tam-test/testfuns.rat" in ()
 
 let%test_unit "code_complique" = 
-let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in () *)
+let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
+
+(* Fichiers de tests de l'intégration des pointeurs -> doivent passer le typage *)
+
+let%test_unit "code_pointeurs" = 
+  let _ = compiler   "../../fichiersRat/testPointeurs.rat" in ()

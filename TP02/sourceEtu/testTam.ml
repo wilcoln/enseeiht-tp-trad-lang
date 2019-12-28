@@ -1,4 +1,4 @@
-(* open Compilateur
+open Compilateur
 
 (* Changer le chemin d'accès du jar. *)
 let runtamcmde = "java -jar ../../runtam.jar"
@@ -50,12 +50,12 @@ let runtam ratfile =
   print_string (runtamcode runtamcmde ratfile)
 
 (* requires ppx_expect in jbuild, and `opam install ppx_expect` *)
-
+(* 
 let%expect_test "testprintint" =
   runtam "../../fichiersRat/src-rat-tam-test/testprintint.rat";
   [%expect{| 42 |}]
 
-let%expect_test "testprintbool" =
+ let%expect_test "testprintbool" =
   runtam "../../fichiersRat/src-rat-tam-test/testprintbool.rat";
   [%expect{| true |}]
 
@@ -87,6 +87,7 @@ let%expect_test "testdenom" =
   runtam "../../fichiersRat/src-rat-tam-test/testdenom.rat";
   [%expect{| 7 |}]
 
+  
 let%expect_test "testwhile1" =
   runtam "../../fichiersRat/src-rat-tam-test/testwhile1.rat";
   [%expect{| 19 |}]
@@ -132,3 +133,8 @@ let%expect_test "factfuns" =
 let%expect_test "factrec" =
   runtam "../../fichiersRat/src-rat-tam-test/factrec.rat";
   [%expect{| 120 |}] *)
+
+  let%expect_test "pointeurs" =
+  runtam "../../fichiersRat/testPointeurs.rat";
+
+  [%expect{| 5 |}]

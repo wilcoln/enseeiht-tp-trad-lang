@@ -1,4 +1,4 @@
-(* (* Module de la passe de gestion des types *)
+(* Module de la passe de gestion des types *)
 module PasseTypeRat : Passe.Passe with type t1 = Ast.AstTds.programme and type t2 = Ast.AstType.programme =
 struct
 
@@ -11,6 +11,30 @@ struct
   type t1 = Ast.AstTds.programme
   type t2 = Ast.AstType.programme
 
+
+(* analyse_type_affectable : AstSyntax.affectable -> Asttype.affectable *)
+(* Paramètre type : la table des symboles courante *)
+(* Paramètre e : l'affectable à analyser *)
+(* Vérifie la bonne utilisation des identifiants et tranforme l'affectable
+en une affectable de type Asttype.affectable *)
+(* Erreur si mauvaise utilisation des identifiants *)
+
+let rec analyse_type_affectable a = 
+  match a with 
+  | AstTds.Ident (ia) -> 
+    begin
+      match info_ast_to_info ia with 
+      | InfoFun (_, t, _) -> (t, Ident(ia))
+      | InfoVar (_, t, _, _) -> (t, Ident(ia))
+      | InfoConst (_, _) -> (Int, Ident(ia))
+    end
+  | AstTds.Contenu (a) -> 
+    begin 
+      let (t, na) = analyse_type_affectable a in 
+      match t with 
+      | Pointeur(tp) -> (tp, Contenu(na))
+      | _ -> failwith "impossible de dereferencer un non pointeur"
+    end
 
 (* analyse_type_expression : AstTds.expression -> AstType.expression *)
 (* Paramètre e : l'expression à analyser *)
@@ -34,13 +58,15 @@ match e with
            end
            | _ -> failwith "error appel fonction"
          end
-    | AstTds.Ident (ia) -> 
-        begin
+    | AstTds.Affectable a -> let (t, na) = analyse_type_affectable a in (t, Affectable (na))
+    | AstTds.Null -> (Pointeur(Undefined), Null)
+    | AstTds.New (tp) -> (Pointeur(tp), New (tp))
+    | AstTds.Adresse (ia) -> 
+         begin 
           match info_ast_to_info ia with 
-          | InfoFun (_, t, _) -> (t, Ident(ia))
-          | InfoVar (_, t, _, _) -> (t, Ident(ia))
-          | InfoConst (_, _) -> (Int, Ident(ia))
-        end
+          | InfoVar(n, t, _, _) -> (Pointeur(t), Adresse(ia))
+          | _ -> failwith "erreur"
+         end
     | AstTds.Rationnel (e1, e2) ->
         begin
             let (texp1, ne1) = analyse_type_expression  e1 in
@@ -123,18 +149,14 @@ let rec analyse_type_instruction  i =
         else 
           raise (TypeInattendu (texp, t))
       end
-  | AstTds.Affectation (e, ia) ->
+  | AstTds.Affectation (a, e) ->
       begin
-        let (texp, ne) = analyse_type_expression  e in 
-        match info_ast_to_info ia with 
-          | InfoVar (_, t, _, _) -> 
-          begin 
-            if est_compatible t texp then
-                  Affectation (ne, ia)
-            else 
-              raise (TypeInattendu (texp, t))
-          end
-          | _ -> failwith "erreur affectation"
+        let (ta, na) = analyse_type_affectable a in 
+        let (te, ne) = analyse_type_expression e in
+        if est_compatible ta te then
+                  Affectation (na, ne)
+        else 
+            raise (TypeInattendu (te, ta))
       end
   | AstTds.Affichage e -> 
       (* Vérification de la bonne utilisation des identifiants dans l'expression *)
@@ -206,4 +228,4 @@ let analyser (AstTds.Programme (fonctions,prog)) =
   let nlf = List.map analyse_type_fonction fonctions in 
   let nb = List.map analyse_type_instruction prog in
   Programme (nlf, nb)
-end *)
+end
