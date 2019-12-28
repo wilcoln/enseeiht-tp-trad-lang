@@ -64,8 +64,10 @@ type expression =
   | Denominateur of expression
   (* Affectable *)
   | Affectable of affectable
-  (* Pointeur de typ *)
-  | Pointeur of typ 
+  (* Null *)
+  | Null
+  (* New de typ *)
+  | New of typ 
   (* Adresse d'identifiant *)
   | Adresse of string
   (* Booléen vrai *)
@@ -133,7 +135,8 @@ struct
     | Numerateur e1 -> "num "^(string_of_expression e1)^" "
     | Denominateur e1 ->  "denom "^(string_of_expression e1)^" "
     | Affectable a -> (string_of_affectable a)^" "
-    | Pointeur tp -> "pointeur de "^(string_of_type tp)^" "
+    | Null -> "Null "
+    | New tp -> "New de "^(string_of_type tp)^" "
     | Adresse n -> "adresse de "^n^" "
     | True -> "true "
     | False -> "false "
@@ -194,7 +197,8 @@ struct
     | Numerateur of expression
     | Denominateur of expression
     | Affectable of affectable
-    | Pointeur of typ 
+    | Null
+    | New of typ 
     | Adresse of Tds.info_ast
     | True
     | False
@@ -250,7 +254,8 @@ type expression =
   | Numerateur of expression
   | Denominateur of expression
   | Affectable of affectable
-  | Pointeur of typ 
+  | Null
+  | New of typ 
   | Adresse of Tds.info_ast
   | True
   | False

@@ -35,7 +35,6 @@ open Ast.AstSyntax
 %token PLUS
 %token MULT
 %token INF
-%token STAR
 %token NULL
 %token NEW
 %token AMP
@@ -88,7 +87,7 @@ typ :
 | BOOL              {Bool}
 | INT               {Int}
 | RAT               {Rat}
-| tp=typ STAR       {Pointeur (tp)}
+| tp=typ MULT       {Pointeur(tp)}
 
 e : 
 | CALL n=ID PO lp=cp PF   {AppelFonction (n,lp)}
@@ -103,13 +102,13 @@ e :
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
 | a1=a                    {Affectable (a1)} (* TODO revenir dessus *)
-| NULL                    {Pointeur (Undefined)}
-| PO NEW tp=typ PF        {Pointeur (tp)}
+| NULL                    {Null}
+| PO NEW tp=typ PF        {New (tp)}
 | AMP n=ID                {Adresse (n)}
 
 a : 
 | n=ID                    {Ident n}
-| PO STAR a1=a PF         {Contenu (a1)}
+| PO MULT a1=a PF         {Contenu (a1)}
 
 cp :
 |               {[]}

@@ -71,7 +71,8 @@ match e with
         let na = analyse_tds_affectable tds a in 
           Affectable(na)
       end
-    | AstSyntax.Pointeur (tp) -> Pointeur(tp)
+    | AstSyntax.Null -> Null
+    | AstSyntax.New (tp) -> New(tp)
     | AstSyntax.Adresse (n) ->
       begin
         match chercherGlobalement tds n with
@@ -113,9 +114,9 @@ let rec analyse_tds_instruction tds i =
             let ne = analyse_tds_expression tds e in
             (* Création de l'information associée à l'identfiant *)
             let info = InfoVar (n, t, 0, "") in
-            (* Création du pointeur sur l'information *)
+            (* Création du New sur l'information *)
             let ia = info_to_info_ast info in
-            (* Ajout de l'information (pointeur) dans la tds *)
+            (* Ajout de l'information (New) dans la tds *)
             ajouter tds n ia;
             (* Renvoie de la nouvelle déclaration où le nom a été remplacé par l'information 
             et l'expression remplacée par l'expression issue de l'analyse *)

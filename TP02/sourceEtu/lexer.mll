@@ -38,7 +38,6 @@ rule token = parse
 | "+"       {PLUS}
 | "*"       {MULT}
 | "<"       {INF}
-| "*"       {STAR}
 | "new"     {NEW}
 | "&"       {AMP}
 | "null"    {NULL}
