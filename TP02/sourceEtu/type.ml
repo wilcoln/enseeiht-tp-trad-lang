@@ -30,6 +30,6 @@ let getTaille t =
   | Pointeur (_) -> 1
   | Bool -> 1
   | Rat -> 2
-  | String -> 2 (* Pas sûr*)
+  | String -> 1 (* Pas sûr*)
   | Undefined -> 0
   

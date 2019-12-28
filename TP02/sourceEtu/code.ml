@@ -242,6 +242,9 @@ let getEntete () =
   ^rout
   ^radd
   ^rmul
+  ^sout
+  ^scat
+  ^ssub
 
 (*Ecriture dans un fichier *)
 let ecrireFichier nom texte =

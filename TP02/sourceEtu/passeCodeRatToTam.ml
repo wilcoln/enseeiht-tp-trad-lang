@@ -2,6 +2,7 @@
 module PasseCodeRatToTam : Passe.Passe with type t1 = Ast.AstPlacement.programme and type t2 = string =
 struct
 
+  open String
   open Tds
   open Exceptions
   open Type
@@ -13,6 +14,12 @@ struct
   type t1 = Ast.AstPlacement.programme
   type t2 = string
 
+
+  (* Convertit de la chaine en list de sous chaine d'1 caractère *)
+  let str_explode s =
+    let rec exp i l =
+      if i < 0 then l else exp (i - 1) ((sub s i 1) :: l) in
+    exp (String.length s - 1) []
 
   let rec taille_type_pointe a = 
     match a with 
@@ -89,9 +96,14 @@ struct
     | True -> "LOADL 1\nSUBR I2B\n"
     | False -> "LOADL 0\nSUBR I2B\n"
     | Entier (i) -> "LOADL "^(string_of_int i)^"\n"
-    | Chaine s -> "" (* TODO *)
+    | Chaine s ->
+      begin
+        let taille_struct = 1 + (length s) in 
+        let cts = "LOADL "^(string_of_int taille_struct)^"\n" in 
+        let lst = str_explode s in cts^(List.fold_right (fun t tq -> "LOADL '"^t^"'\n"^tq) lst "")^cts^"SUBR Malloc\n"^"STOREI ("^(string_of_int taille_struct)^")\n"^"POP (1) "^(string_of_int taille_struct)^"\n"
+      end
     | SousChaine (e1, e2, e3) -> "" (* TODO *)
-    | Longueur e -> "" (*TODO*)
+    | Longueur e -> let ce = analyse_code_expression e in ce^"LOADI (1)\n"
     | Binaire (b, e1, e2) -> 
       begin
         let c1 = analyse_code_expression e1 in 
@@ -104,7 +116,7 @@ struct
         | EquBool -> c1^c2^"SUBR BAnd\n"^c1^"SUBR BNeg\n"^c2^"SUBR BNeg\n"^"SUBR BAnd\n"^"SUBR BOr\n"
         | EquInt -> c1^c2^"SUBR IEq\n"
         | Inf -> c1^c2^"SUBR ILss\n"
-        | Concat -> c1^c2^"CALL (SB) SOut\n"
+        | Concat -> c1^c2^"CALL (SB) Scat\n"
       end
 
   let rec analyse_code_bloc b = 
@@ -143,6 +155,7 @@ and analyse_code_instruction i =
     | AffichageInt e -> let ce = analyse_code_expression e in ce^"SUBR IOut\n"
     | AffichageRat e -> let ce = analyse_code_expression e in ce^"CALL (SB) ROut\n"
     | AffichageBool e -> let ce = analyse_code_expression e in ce^"SUBR BOut\n"
+    | AffichageString e -> let ce = analyse_code_expression e in ce^"CALL (SB) SOut\n"
     | Conditionnelle (c, t, e) ->
         begin
           let codeC = analyse_code_expression c in 
@@ -180,6 +193,6 @@ let analyser (Programme (fonctions, prog)) =
   let code_programme = analyse_code_bloc prog in
   let label_main = "main;" in
   let code_tam = code_fonctions^label_main^"\n"^code_programme^"\nHALT" in 
-  let _ = ecrireFichier "output.tam" code_tam in
+  print_endline code_tam; (* Pour débugger *)
   (getEntete () )^code_tam
 end
