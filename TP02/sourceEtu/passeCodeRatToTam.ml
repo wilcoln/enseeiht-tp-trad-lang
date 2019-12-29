@@ -69,8 +69,8 @@ struct
           | Ident (ia) -> ca
           | Contenu (a) -> let ttp = taille_type_pointe a in ca^"LOADI ("^(string_of_int ttp)^")\n"
         end
-      | Null -> "SUBR Mvoid\n"
-      | New (tp) -> "LOADL "^(string_of_int (getTaille tp))^"\nSUBR Malloc\n"
+      | Null -> "SUBR MVoid\n"
+      | New (tp) -> "LOADL "^(string_of_int (getTaille tp))^"\nSUBR MAlloc\n"
       | Adresse (ia) -> 
            begin 
             match info_ast_to_info ia with 
@@ -96,14 +96,20 @@ struct
     | True -> "LOADL 1\nSUBR I2B\n"
     | False -> "LOADL 0\nSUBR I2B\n"
     | Entier (i) -> "LOADL "^(string_of_int i)^"\n"
-    | Chaine s ->
+    | Chaine s -> (**TODO à améliorer : LB?? , libération de mémoire *)
       begin
-        let taille_struct = 1 + (length s) in 
-        let cts = "LOADL "^(string_of_int taille_struct)^"\n" in 
-        let lst = str_explode s in cts^(List.fold_right (fun t tq -> "LOADL '"^t^"'\n"^tq) lst "")^cts^"SUBR Malloc\n"^"STOREI ("^(string_of_int taille_struct)^")\n"^"POP (1) "^(string_of_int taille_struct)^"\n"
+        let taille_chaine = length s in 
+        let ctc = "LOADL "^(string_of_int taille_chaine)^"\n" in 
+        let lst = str_explode s in (List.fold_right (fun t tq -> "LOADL '"^t^"'\n"^tq) lst "")^ctc^"SUBR MAlloc\nSTORE (1) "^(string_of_int (1+taille_chaine))^"[LB]\nLOAD (1) "^(string_of_int (1+taille_chaine))^"[LB]\nSTOREI ("^(string_of_int (taille_chaine))^")\n\n"^ctc^"LOADL 1\nSUBR MAlloc\nSTORE (1) "^(string_of_int (2+taille_chaine))^"[LB]\nLOAD (1) "^(string_of_int (2+taille_chaine))^"[LB]\nSTOREI (1)\n\nLOAD (1) "^(string_of_int (2+taille_chaine))^"[LB]\nLOAD (1) "^(string_of_int (1+taille_chaine))^"[LB]\nLOADL 2\nSUBR MAlloc\nSTORE (1) "^(string_of_int (3+taille_chaine))^"[LB]\nLOAD (1) "^(string_of_int (3+taille_chaine))^"[LB]\nSTOREI (2)\n"^"\nLOAD (1) "^(string_of_int (3+taille_chaine))^"[LB]\n"(*^"LOADI (1)\nLOADI (1)\nSUBR IOut\n"*)
       end
-    | SousChaine (e1, e2, e3) -> "" (* TODO *)
-    | Longueur e -> let ce = analyse_code_expression e in ce^"LOADI (1)\n"
+    | SousChaine (e1, e2, e3) ->
+      begin
+        let c1 = analyse_code_expression e1 in 
+        let c2 = analyse_code_expression e2 in
+        let c3 = analyse_code_expression e3 in
+        c1^c2^c3^"CALL (SB) SSub\n"
+      end
+    | Longueur e -> let ce = analyse_code_expression e in ce^"LOADI (1)\nLOADI (1)\n"
     | Binaire (b, e1, e2) -> 
       begin
         let c1 = analyse_code_expression e1 in 
@@ -193,6 +199,6 @@ let analyser (Programme (fonctions, prog)) =
   let code_programme = analyse_code_bloc prog in
   let label_main = "main;" in
   let code_tam = code_fonctions^label_main^"\n"^code_programme^"\nHALT" in 
-  print_endline code_tam; (* Pour débugger *)
+  (*print_endline code_tam; Pour débugger*)
   (getEntete () )^code_tam
 end

@@ -107,7 +107,7 @@ let sout =
   finBouclePrintSout
   RETURN (0) 1\n\n"
   
-  let scat =
+let scat =
     "SCat ; concatene deux chaines de caracteres passées en paramètre -2[LB] adresse de la premiere chaine -1[LB] adresse de la seconde chaine
     LOAD (1) -2[LB]
     LOADI (1) ; taille de c1

@@ -1,19 +1,4 @@
-string mix (string s1 string s2){
-    int x = 2;
-    string res = "fs";
-    if (length s1 = length s2) {
-        int t = length s1;
-        int i = 0;
-        while (i<t){
-            res = ((res ^ (s1{i,i})) ^ (s2{i,i}));
-            i = (i+1);
-        }
-    }
-    else {
-        print "erreur\n";
-    }
-return res;
-}
 main{
-    print "fin";
+   print "fin";
+    
 }
