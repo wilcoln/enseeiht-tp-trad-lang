@@ -10,6 +10,7 @@ struct
   open AstType
   open AstPlacement
   open Code
+  open PasseTypeRat
 
   type t1 = Ast.AstPlacement.programme
   type t2 = string
@@ -52,13 +53,14 @@ struct
 
   let rec analyse_code_expression e = 
     match e with 
-    | AppelFonction(ia, le) -> 
+    | AppelFonction(ia, le, lte) -> 
       begin
         match info_ast_to_info ia with
-          | InfoFun(n, t , lt) -> 
+          | InfoFun(n, t , ltl) -> 
             begin
+              let unique_suffix = List.fold_right (fun te tq -> (string_of_type te)^tq) lte "" in
               let cle = List.fold_right (fun t tq -> (analyse_code_expression t)^tq) le "" in 
-              cle^"CALL (SB) "^n^"\n"
+              cle^"CALL (SB) "^n^unique_suffix^"\n"
             end
           | _ -> failwith "erreur generation code appel fonction"
       end
@@ -185,9 +187,11 @@ and analyse_code_instruction i =
 
 let analyse_code_fonction (Fonction(ia, lpia, li, e)) = 
   match info_ast_to_info ia with 
-  | InfoFun(n,t,lt) -> 
+  | InfoFun(n,t,ltl) -> 
     begin
-      let labelFonction = n in 
+      let lt = List.map (fun pia -> match info_ast_to_info pia with |InfoVar(_,t,_,_) -> t | _ -> failwith "internal error") lpia in
+      let unique_suffix = List.fold_right (fun te tq -> (string_of_type te)^tq) lt "" in
+      let labelFonction = n^unique_suffix in 
       let code_bloc = analyse_code_bloc li in
       let ce = analyse_code_expression e in
       labelFonction^"\n"^code_bloc^ce^"\nRETURN ("^(string_of_int (getTaille t))^") "^(string_of_int (List.fold_right (+) (List.map getTaille lt) 0))^"\n"
@@ -199,6 +203,6 @@ let analyser (Programme (fonctions, prog)) =
   let code_programme = analyse_code_bloc prog in
   let label_main = "main;" in
   let code_tam = code_fonctions^label_main^"\n"^code_programme^"\nHALT" in 
-  (*print_endline code_tam; Pour débugger*)
+ (*  print_endline code_tam; (* Pour débugger *) *)
   (getEntete () )^code_tam
 end

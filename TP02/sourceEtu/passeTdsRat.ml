@@ -6,6 +6,7 @@ struct
   open Exceptions
   open Ast
   open AstTds
+  open Type
 
   type t1 = Ast.AstSyntax.programme
   type t2 = Ast.AstTds.programme
@@ -223,6 +224,7 @@ let analyse_tds_parametre tds (ptype, pnom) =
       end      
     | Some _ -> raise (DoubleDeclaration pnom)
 
+
 (* analyse_tds_fonction : AstSyntax.fonction -> AstTds.fonction *)
 (* Paramètre tds : la table des symboles courante *)
 (* Paramètre : la fonction à analyser *)
@@ -232,11 +234,11 @@ en une fonction de type AstTds.fonction *)
 let rec analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li,e))  =
   begin
     match chercherLocalement maintds n with 
-    | None -> 
+    | None ->
       begin
         let tdsfonc = creerTDSFille maintds in 
         let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-        let info = InfoFun(n, t, (fst (List.split lp))) in 
+        let info = InfoFun(n, t, (fst (List.split lp))::[]) in 
         let ia = info_to_info_ast info in
         ajouter tdsfonc n ia;
         ajouter maintds n ia;
@@ -244,7 +246,25 @@ let rec analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li,e))  =
         let ne = analyse_tds_expression tdsfonc e in 
         Fonction(t, ia, nlp , nli, ne)
       end
-    | Some _ -> raise (DoubleDeclaration n)
+    | Some ia -> (** TODO : à changer *)
+    begin
+      match info_ast_to_info ia with
+        | InfoFun(_, _, ltl) -> 
+          let lt = (fst (List.split lp)) in 
+          if not (List.mem  lt ltl) then
+          begin
+            let tdsfonc = creerTDSFille maintds in 
+            let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
+            ajouter_surcharge lt ia;
+            ajouter tdsfonc n ia;
+            ajouter maintds n ia;
+            let nli = List.map (analyse_tds_instruction tdsfonc) li in
+            let ne = analyse_tds_expression tdsfonc e in 
+            Fonction(t, ia, nlp , nli, ne)
+          end
+          else raise (DoubleDeclaration n)
+        | _ -> raise (MauvaiseUtilisationIdentifiant n) (**TODO:  Leer une exception plus pertinente*)
+  end
   end
   
 

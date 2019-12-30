@@ -260,7 +260,7 @@ type affectable =
 (* Expressions existantes dans Rat *)
 (* = expression de AstTds *)
 type expression =
-  | AppelFonction of Tds.info_ast * expression list
+  | AppelFonction of Tds.info_ast * expression list * typ list
   | Rationnel of expression * expression
   | Numerateur of expression
   | Denominateur of expression

@@ -46,15 +46,15 @@ match e with
     | AstTds.AppelFonction (ia, le) -> 
         begin
            match info_ast_to_info ia with 
-           | InfoFun(n, t, lt) -> 
+           | InfoFun(n, t, ltl) -> 
            begin
             let nle = List.map analyse_type_expression le in 
             let lte = fst (List.split nle) in
-              if est_compatible_list lt lte
+              if List.fold_right (fun lt tq -> tq || (est_compatible_list lt lte)) ltl false
               then
-                (t, AppelFonction (ia, snd (List.split nle)))
+                (t, AppelFonction (ia, snd (List.split nle), lte))
               else
-                raise (TypesParametresInattendus (lt, lte))
+                raise (TypesParametresInattendus ((List.hd ltl), lte)) (**TODO : changer ça*)
            end
            | _ -> failwith "error appel fonction"
          end
