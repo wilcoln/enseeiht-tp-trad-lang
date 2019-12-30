@@ -48,7 +48,7 @@ struct
       end
     | Contenu (a) ->
       begin 
-        let ca = analyse_code_affectable a in ca
+        let ca = analyse_code_affectable a in ca^"LOADI (1)\n"
       end
 
   let rec analyse_code_expression e = 
@@ -203,6 +203,6 @@ let analyser (Programme (fonctions, prog)) =
   let code_programme = analyse_code_bloc prog in
   let label_main = "main;" in
   let code_tam = code_fonctions^label_main^"\n"^code_programme^"\nHALT" in 
- (*  print_endline code_tam; (* Pour débugger *) *)
+  (* print_endline code_tam; *)
   (getEntete () )^code_tam
 end

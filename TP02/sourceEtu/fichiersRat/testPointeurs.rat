@@ -1,10 +1,11 @@
 main{
 int * px = (new int);
+int ** ppx = &px;
 int x = 3;
 px = &x;
 int y = (*px);
 (*px) = 5;
-int z = (*px);
+int z = (*(*ppx));
 
 print z;
 }
