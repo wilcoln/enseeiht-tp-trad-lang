@@ -21,21 +21,6 @@ struct
     let rec exp i l =
       if i < 0 then l else exp (i - 1) ((sub s i 1) :: l) in
     exp (String.length s - 1) []
-
-  let rec taille_type_pointe a = 
-    match a with 
-    |  Ident (ia) -> 
-      begin
-      match info_ast_to_info ia with
-        | InfoVar(n, t, base, reg) -> 
-          begin
-            match t with 
-            | Pointeur (tp) -> getTaille tp
-            | _ -> failwith "pas un pointeur"
-          end
-        | _ -> failwith "pas un pointeur"
-      end
-  | Contenu (a) -> taille_type_pointe a
   
   let rec analyse_code_affectable a  = 
     match a with 
@@ -46,9 +31,9 @@ struct
         | InfoConst(n, v) -> "LOADL "^(string_of_int v)^"\n"
         | _ -> failwith "erreur generation code identifiant"
       end
-    | Contenu (a) ->
+    | Contenu (a, tp) ->
       begin 
-        let ca = analyse_code_affectable a in ca^"LOADI (1)\n"
+        let ca = analyse_code_affectable a in ca^"LOADI ("^(string_of_int (getTaille tp))^")\n"
       end
 
   let rec analyse_code_expression e = 
@@ -64,13 +49,7 @@ struct
             end
           | _ -> failwith "erreur generation code appel fonction"
       end
-      | Affectable a -> 
-        begin
-          let ca = analyse_code_affectable a in 
-          match a with 
-          | Ident (ia) -> ca
-          | Contenu (a) -> let ttp = taille_type_pointe a in ca^"LOADI ("^(string_of_int ttp)^")\n"
-        end
+      | Affectable a -> analyse_code_affectable a
       | Null -> "SUBR MVoid\n"
       | New (tp) -> "LOADL "^(string_of_int (getTaille tp))^"\nSUBR MAlloc\n"
       | Adresse (ia) -> 
@@ -145,7 +124,6 @@ and analyse_code_instruction i =
         end
     | Affectation (a, e) ->
         begin
-          let ca = analyse_code_affectable a in
           let ce = analyse_code_expression e in 
           match a with
           | Ident(ia) ->
@@ -154,10 +132,18 @@ and analyse_code_instruction i =
               | InfoVar (_, t, base, reg) -> ce^"STORE ("^(string_of_int (getTaille t))^") "^(string_of_int base)^"["^reg^"]\n"
               | _ -> ""
             end
-          | Contenu (pa) -> 
+          | Contenu (a, tp) -> 
             begin 
-              let ttp = taille_type_pointe pa in 
-              ce^ca^"STOREI ("^(string_of_int ttp)^")\n"
+              let rec aux a acc = 
+                match a with 
+                | Ident(ia) -> 
+                  begin
+                    match info_ast_to_info ia with 
+                    | InfoVar (_, t, base, reg) -> "LOAD (1) "^(string_of_int base)^"["^reg^"]\n"
+                    | _ -> ""
+                  end
+                | Contenu (ap, _) -> aux ap acc^"LOADI (1)\n" in 
+              ce^(aux a "")^"STOREI ("^(string_of_int (getTaille tp))^")\n"
             end
         end
     | AffichageInt e -> let ce = analyse_code_expression e in ce^"SUBR IOut\n"

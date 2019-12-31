@@ -32,7 +32,7 @@ let rec analyse_type_affectable a =
     begin 
       let (t, na) = analyse_type_affectable a in 
       match t with 
-      | Pointeur(tp) -> (tp, Contenu(na))
+      | Pointeur(tp) -> (tp, Contenu(na, tp))
       | _ -> failwith "impossible de dereferencer un non pointeur"
     end
 

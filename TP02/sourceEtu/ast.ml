@@ -255,7 +255,7 @@ type binaire = PlusInt | PlusRat | MultInt | MultRat | EquInt | EquBool | Inf | 
 type affectable = 
   (* Accès à un identifiant représenté par son nom *)
   | Ident of Tds.info_ast (* le nom de l'identifiant est remplacé par ses informations *)
-  | Contenu of affectable
+  | Contenu of affectable * typ
 
 (* Expressions existantes dans Rat *)
 (* = expression de AstTds *)

@@ -137,7 +137,7 @@ let%expect_test "factrec" =
   let%expect_test "pointeurs" =
   runtam "../../fichiersRat/testPointeurs.rat";
 
-  [%expect{| 5 |}]
+  [%expect{| [1/2]5 |}]
 
 (* let%expect_test "chaines" =
   runtam "../../fichiersRat/testChaines.rat";
