@@ -81,7 +81,16 @@ struct
       begin
         let taille_chaine = length s in 
         let ctc = "LOADL "^(string_of_int taille_chaine)^"\n" in 
-        let lst = str_explode s in (List.fold_right (fun t tq -> "LOADL '"^t^"'\n"^tq) lst "")^ctc^"SUBR MAlloc\nSTORE (1) "^(string_of_int (1+taille_chaine))^"[LB]\nLOAD (1) "^(string_of_int (1+taille_chaine))^"[LB]\nSTOREI ("^(string_of_int (taille_chaine))^")\n\n"^ctc^"LOADL 1\nSUBR MAlloc\nSTORE (1) "^(string_of_int (2+taille_chaine))^"[LB]\nLOAD (1) "^(string_of_int (2+taille_chaine))^"[LB]\nSTOREI (1)\n\nLOAD (1) "^(string_of_int (2+taille_chaine))^"[LB]\nLOAD (1) "^(string_of_int (1+taille_chaine))^"[LB]\nLOADL 2\nSUBR MAlloc\nSTORE (1) "^(string_of_int (3+taille_chaine))^"[LB]\nLOAD (1) "^(string_of_int (3+taille_chaine))^"[LB]\nSTOREI (2)\n"^"\nLOAD (1) "^(string_of_int (3+taille_chaine))^"[LB]\n"(*^"LOADI (1)\nLOADI (1)\nSUBR IOut\n"*)
+        let lst = str_explode s in (List.fold_right (fun t tq -> "LOADL '"^t^"'\n"^tq) lst "")^
+        ctc^"SUBR MAlloc\nSTORE (1) "^(string_of_int (1+taille_chaine))^"[LB]\n
+        LOAD (1) "^(string_of_int (1+taille_chaine))^"[LB]\nSTOREI ("^(string_of_int (taille_chaine))^")\n\n"^
+        ctc^"LOADL 1\nSUBR MAlloc\nSTORE (1) "^(string_of_int (2+taille_chaine))^"[LB]\n
+        LOAD (1) "^(string_of_int (2+taille_chaine))^"[LB]\nSTOREI (1)\n\n
+        LOAD (1) "^(string_of_int (2+taille_chaine))^"[LB]\n
+        LOAD (1) "^(string_of_int (1+taille_chaine))^"[LB]\n
+        LOADL 2\nSUBR MAlloc\nSTORE (1) "^(string_of_int (3+taille_chaine))^"[LB]\n
+        LOAD (1) "^(string_of_int (3+taille_chaine))^"[LB]\nSTOREI (2)\n"^"\n
+        LOAD (1) "^(string_of_int (3+taille_chaine))^"[LB]\n"
       end
     | SousChaine (e1, e2, e3) ->
       begin
