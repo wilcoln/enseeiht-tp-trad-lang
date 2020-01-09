@@ -43,7 +43,7 @@ rule token = parse
 | "null"    {NULL}
 | "string"  {STRING}
 | "^"       {CARAT}
-| ","       {COMMA}
+| ","       {VIRG}
 | "length"  {LENGTH}
 
 | ['0'-'9']+ as i   { ENTIER (int_of_string i) }

@@ -142,7 +142,7 @@ let%expect_test "factrec" =
 let%expect_test "chaines" =
   runtam "../../fichiersRat/testChaines.rat";
 
-  [%expect{| fin |}]
+  [%expect{| aebfcgdh |}]
 
 let%expect_test "surcharge" =
   runtam "../../fichiersRat/testSurcharge.rat";

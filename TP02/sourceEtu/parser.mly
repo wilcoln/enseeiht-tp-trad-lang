@@ -41,7 +41,7 @@ open Ast.AstSyntax
 %token AMP
 %token STRING
 %token CARAT
-%token COMMA
+%token VIRG
 %token LENGTH
 %token EOF
 
@@ -104,7 +104,7 @@ e :
 | FALSE                   {False}
 | e=ENTIER                {Entier e}
 | s=CHAINE                {let trimStr = (String.sub s 1 ((String.length s)-2)) in Chaine trimStr}
-| PO e1=e AO e2=e COMMA e3=e AF PF {SousChaine (e1,e2,e3)}
+| PO e1=e AO e2=e VIRG e3=e AF PF {SousChaine (e1,e2,e3)}
 | LENGTH e1=e             {Longueur (e1)}
 | PO e1=e PLUS e2=e PF    {Binaire (Plus,e1,e2)}
 | PO e1=e MULT e2=e PF    {Binaire (Mult,e1,e2)}
