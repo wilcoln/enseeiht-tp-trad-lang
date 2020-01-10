@@ -177,7 +177,7 @@ let analyse_code_fonction fonction =
   | Fonction(ia, lpia, li, e) -> 
       begin
         match info_ast_to_info ia with 
-        | InfoFun(n,t,ltl) -> 
+        | InfoFun(n,t,_) -> 
           begin
             let lt = List.map (fun pia -> match info_ast_to_info pia with |InfoVar(_,t,_,_) -> t | _ -> failwith "internal error") lpia in
             let unique_suffix = List.fold_right (fun te tq -> (string_of_type te)^tq) lt "" in
@@ -188,7 +188,7 @@ let analyse_code_fonction fonction =
           end
         | _ -> ""
         end
-  | Prototype(ia) -> failwith "erreur gestion prototype"
+  | Prototype(ia) -> ""
   
 let analyser (Programme (lf1, prog, lf2)) =
   let code_fonctions1 = List.fold_right (fun f tq -> (analyse_code_fonction f)^tq) lf1 "" in

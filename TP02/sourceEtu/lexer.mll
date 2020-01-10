@@ -48,7 +48,7 @@ rule token = parse
 
 | ['0'-'9']+ as i   { ENTIER (int_of_string i) }
 | ['a'-'z'](['A'-'Z''a'-'z''0'-'9']|"-"|"_")* as n  { ID n }
-| "\""(['A'-'Z''a'-'z''0'-'9']|"-"|"_"|"\\n"|" ")*"\"" as s  { CHAINE s }
+| "\""(['A'-'Z''a'-'z''0'-'9']|"-"|"_"|"\\"|" ")*"\"" as s  { CHAINE s }
 | eof   { EOF }
 | _
 { raise (Error ("Unexpected char: "^(Lexing.lexeme lexbuf)^" at "^(string_of_int (Lexing.lexeme_start
