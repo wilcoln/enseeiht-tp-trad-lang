@@ -532,3 +532,5 @@ let%test_unit "code_pointeurs" =
 (* Fichiers de tests de l'intégration des chaines -> doivent passer lae *)
 let%test_unit "code_string" = 
 let _ = compiler   "../../fichiersRat/testChaines.rat" in ()
+let%test_unit "code_protototype" = 
+let _ = compiler   "../../fichiersRat/testPrototype.rat" in ()

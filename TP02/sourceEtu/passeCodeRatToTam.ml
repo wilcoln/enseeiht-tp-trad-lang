@@ -41,7 +41,7 @@ struct
     | AppelFonction(ia, le, lte) -> 
       begin
         match info_ast_to_info ia with
-          | InfoFun(n, t , ltl) -> 
+          | InfoFun(n, t , bltl) -> 
             begin
               let unique_suffix = List.fold_right (fun te tq -> (string_of_type te)^tq) lte "" in
               let cle = List.fold_right (fun t tq -> (analyse_code_expression t)^tq) le "" in 
@@ -177,25 +177,25 @@ let analyse_code_fonction fonction =
   | Fonction(ia, lpia, li, e) -> 
       begin
         match info_ast_to_info ia with 
-        | InfoFun(n,t,ltl) -> 
+        | InfoFun(n,t,bltl) -> 
           begin
             let lt = List.map (fun pia -> match info_ast_to_info pia with |InfoVar(_,t,_,_) -> t | _ -> failwith "internal error") lpia in
             let unique_suffix = List.fold_right (fun te tq -> (string_of_type te)^tq) lt "" in
             let labelFonction = n^unique_suffix in 
             let code_bloc = analyse_code_bloc li in
             let ce = analyse_code_expression e in
-            labelFonction^"\n"^code_bloc^ce^"\nRETURN ("^(string_of_int (getTaille t))^") "^(string_of_int (List.fold_right (+) (List.map getTaille lt) 0))^"\n"
+            labelFonction^"\n"^code_bloc^ce^"RETURN ("^(string_of_int (getTaille t))^") "^(string_of_int (List.fold_right (+) (List.map getTaille lt) 0))^"\n"
           end
         | _ -> ""
         end
-  | Prototype(ia) -> failwith "erreur gestion prototype"
-  
+  | Prototype(ia) -> ""
+
 let analyser (Programme (lf1, prog, lf2)) =
   let code_fonctions1 = List.fold_right (fun f tq -> (analyse_code_fonction f)^tq) lf1 "" in
   let code_programme = analyse_code_bloc prog in
   let label_main = "main;" in
   let code_fonctions2 = List.fold_right (fun f tq -> (analyse_code_fonction f)^tq) lf2 "" in
-  let code_tam = code_fonctions1^label_main^"\n"^code_programme^code_fonctions2^"HALT" in 
+  let code_tam = code_fonctions1^code_fonctions2^label_main^"\n"^code_programme^"HALT" in 
   (* print_endline code_tam; *)
   (getEntete () )^code_tam
 end

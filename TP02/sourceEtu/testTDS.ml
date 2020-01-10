@@ -347,5 +347,8 @@ let%test_unit "code_complique" =
 let%test_unit "code_pointeurs" = 
   let _ = compiler   "../../fichiersRat/testPointeurs.rat" in ()
 
-  let%test_unit "code_surcharge" = 
+let%test_unit "code_surcharge" = 
   let _ = compiler   "../../fichiersRat/testSurcharge.rat" in ()
+
+let%test_unit "code_protototype" = 
+  let _ = compiler   "../../fichiersRat/testPrototype.rat" in ()

@@ -3,6 +3,7 @@ open Ast.AstSyntax
 
 (* Exceptions pour la gestion des identificateurs *)
 exception DoubleDeclaration of string 
+exception DoubleDeclarationPrototype of string
 exception IdentifiantNonDeclare of string 
 exception MauvaiseUtilisationIdentifiant of string 
 

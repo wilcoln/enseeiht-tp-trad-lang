@@ -89,7 +89,7 @@ let analyse_placement_fonction fonction =
       | InfoFun(_, t, _) -> (getTaille t, Fonction(ia, lpia, li, e))
       | _ -> failwith "error analyse placement fonction"
     end
-  | AstType.Prototype(ia) -> failwith "erreur gestion prototype"
+  | AstType.Prototype(ia) -> (0, Prototype(ia))
 
 (* analyser : AstType.ast -> AstPlacement.ast *)
 let analyser (AstType.Programme (lf1 ,prog, lf2)) =

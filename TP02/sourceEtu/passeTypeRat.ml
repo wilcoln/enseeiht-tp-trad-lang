@@ -46,9 +46,10 @@ match e with
     | AstTds.AppelFonction (ia, le) -> 
         begin
            match info_ast_to_info ia with 
-           | InfoFun(n, t, ltl) -> 
+           | InfoFun(n, t, bltl) -> 
            begin
             let nle = List.map analyse_type_expression le in 
+            let ltl = fst (List.split bltl) in 
             let lte = fst (List.split nle) in
               if List.fold_right (fun lt tq -> tq || (est_compatible_list lt lte)) ltl false
               then
@@ -250,7 +251,7 @@ let rec analyse_type_fonction fonction =
         else 
           raise (TypeInattendu (texp, t))
       end
-  | AstTds.Prototype(t,n,lt) -> failwith "erreur prototype non géré"
+  | AstTds.Prototype(ia) -> Prototype(ia)
   
 
 (* analyser : AstTds.ast -> AstType.ast *)

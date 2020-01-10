@@ -5,7 +5,7 @@ open Type
 type info =
   | InfoConst of string * int
   | InfoVar of string * typ * int * string
-  | InfoFun of string * typ * typ list list (** Prise en compte de la surcharge*)
+  | InfoFun of string * typ * (typ list * bool) list (** double list pour prise en compte de la surcharge, bool = corps est fourni ?*)
 
 (* Données stockées dans la tds  et dans les AST : pointeur sur une information *)
 type info_ast = info ref  
@@ -49,7 +49,7 @@ let string_of_info info =
   match info with
   | InfoConst (n,value) -> "Constante "^n^" : "^(string_of_int value)
   | InfoVar (n,t,dep,base) -> "Variable "^n^" : "^(string_of_type t)^" "^(string_of_int dep)^"["^base^"]"
-  | InfoFun (n,t,tpl) -> "Fonction "^n^" : "^(List.fold_right (fun tp tplq -> (List.fold_right (fun elt tq -> if tq = "" then (string_of_type elt) else (string_of_type elt)^" * "^tq) tp "" )^"\n"^tplq)tpl "")^
+  | InfoFun (n,t, bltl) -> let ltl = (fst (List.split bltl)) in "Fonction "^n^" : "^(List.fold_right (fun tp tplq -> (List.fold_right (fun elt tq -> if tq = "" then (string_of_type elt) else (string_of_type elt)^" * "^tq) tp "" )^"\n"^tplq) ltl "")^
                       " -> "^(string_of_type t)
 
 
@@ -74,14 +74,14 @@ let afficher_globale tds =
     |InfoVar (n,_,dep,base) -> i:= InfoVar (n,t,dep,base)
     | _ -> failwith "Appel modifier_type_info pas sur un InfoVar"
  
-let ajouter_surcharge tp i = 
-  match !i with
-       |InfoFun(n,t,tpl) -> i:= InfoFun(n,t,tp::tpl)
-       | _ -> failwith "Appel ajouter surcharge pas sur un InfoFun"
+let ajouter_surcharge (lt, impl) i = 
+    match !i with
+    |InfoFun(n,t,bltl) -> i:= InfoFun(n,t,(lt, impl)::bltl)
+    | _ -> failwith "Appel ajouter surcharge pas sur un InfoFun"
 
  let modifier_type_fonction_info t tp i =
        match !i with
-       |InfoFun(n,_,tpl) -> i:= InfoFun(n,t,tp::tpl)
+       |InfoFun(n,_,tpl) -> i:= InfoFun(n,t,(tp,true)::tpl)
        | _ -> failwith "Appel modifier_type_fonction_info pas sur un InfoFun"
  
  let modifier_adresse_info d b i =

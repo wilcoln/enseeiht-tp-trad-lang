@@ -240,7 +240,7 @@ let rec analyse_tds_fonction maintds fonction  =
         begin
           let tdsfonc = creerTDSFille maintds in 
           let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-          let info = InfoFun(n, t, (fst (List.split lp))::[]) in 
+          let info = InfoFun(n, t, ((fst (List.split lp)), true)::[]) in 
           let ia = info_to_info_ast info in
           ajouter tdsfonc n ia;
           ajouter maintds n ia;
@@ -251,24 +251,57 @@ let rec analyse_tds_fonction maintds fonction  =
       | Some ia -> (** TODO : à changer *)
         begin
           match info_ast_to_info ia with
-            | InfoFun(_, _, ltl) -> 
+            | InfoFun(_, _, bltl) -> 
               let lt = (fst (List.split lp)) in 
-              if not (List.mem lt ltl) then
-              begin
-                let tdsfonc = creerTDSFille maintds in 
-                let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-                ajouter_surcharge lt ia;
-                ajouter tdsfonc n ia;
-                ajouter maintds n ia;
-                let nli = List.map (analyse_tds_instruction tdsfonc) li in
-                let ne = analyse_tds_expression tdsfonc e in 
-                Fonction(t, ia, nlp , nli, ne)
-              end
-              else raise (DoubleDeclaration n)
+              if not (List.mem_assoc lt bltl) then
+                begin
+                  let tdsfonc = creerTDSFille maintds in 
+                  let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
+                  ajouter_surcharge (lt, true) ia;
+                  ajouter tdsfonc n ia;
+                  ajouter maintds n ia;
+                  let nli = List.map (analyse_tds_instruction tdsfonc) li in
+                  let ne = analyse_tds_expression tdsfonc e in 
+                  Fonction(t, ia, nlp , nli, ne)
+                end
+              else 
+                if not (List.assoc lt bltl) then 
+                  begin
+                    let tdsfonc = creerTDSFille maintds in 
+                    let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
+                    ajouter tdsfonc n ia;
+                    let nli = List.map (analyse_tds_instruction tdsfonc) li in
+                    let ne = analyse_tds_expression tdsfonc e in 
+                    Fonction(t, ia, nlp , nli, ne)
+                  end
+                else raise (DoubleDeclaration n)
             | _ -> raise (MauvaiseUtilisationIdentifiant n) (**TODO:  Leer une exception plus pertinente*)
         end
     end
-  | AstSyntax.Prototype(t,n,lt) -> failwith "erreur prototype non géré"
+  | AstSyntax.Prototype(t,n,lt) ->
+  begin
+    match chercherLocalement maintds n with 
+    | None ->
+      begin
+        let info = InfoFun(n, t, (lt, false)::[]) in 
+        let ia = info_to_info_ast info in
+        ajouter maintds n ia;
+        Prototype(ia)
+      end
+    | Some ia -> (** TODO : à changer *)
+      begin
+        match info_ast_to_info ia with
+          | InfoFun(_, _, bltl) -> 
+            if not (List.mem_assoc lt bltl) then
+            begin
+              ajouter_surcharge (lt, false) ia;
+              ajouter maintds n ia;
+              Prototype(ia)
+            end
+            else raise (DoubleDeclarationPrototype n)
+          | _ -> raise (MauvaiseUtilisationIdentifiant n) (**TODO:  Lier une exception plus pertinente*)
+      end
+  end
   
 
 (* analyser : AstSyntax.ast -> AstTds.ast *)

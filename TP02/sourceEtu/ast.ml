@@ -240,7 +240,7 @@ struct
   (* type de retour - nom - liste des paramètres (association type et information sur les paramètres) - corps de la fonction - expression de retour - information sur la fonction*)
   (* le nom de la fonction est gardé car il sera nécessaire au moment de la génération de code*)
   type fonction = 
-    | Prototype of typ * Tds.info_ast * typ list
+    | Prototype of Tds.info_ast
     | Fonction of typ * Tds.info_ast * (typ * Tds.info_ast ) list * instruction list * expression 
 
   (* Structure d'un programme dans notre langage *)
