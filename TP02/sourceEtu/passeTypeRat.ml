@@ -236,18 +236,21 @@ let analyse_type_parametre (ptype, pia) =
 (* Vérifie la bonne utilisation des identifiants et tranforme la fonction
 en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let rec analyse_type_fonction (AstTds.Fonction(t,ia,lp,li,e))  =
-  begin
-    (* Analyse de la condition *)
-    let (texp, ne) = analyse_type_expression e in 
-    if est_compatible t texp then
-        let nlp = List.map analyse_type_parametre lp in
-        let nli = List.map analyse_type_instruction li in
-        modifier_type_fonction_info t (fst (List.split nlp)) ia;
-        Fonction(ia, snd (List.split nlp), nli, ne)
-    else 
-      raise (TypeInattendu (texp, t))
-  end
+let rec analyse_type_fonction fonction =
+  match fonction with 
+  | AstTds.Fonction(t,ia,lp,li,e) -> 
+      begin
+        (* Analyse de la condition *)
+        let (texp, ne) = analyse_type_expression e in 
+        if est_compatible t texp then
+            let nlp = List.map analyse_type_parametre lp in
+            let nli = List.map analyse_type_instruction li in
+            modifier_type_fonction_info t (fst (List.split nlp)) ia;
+            Fonction(ia, snd (List.split nlp), nli, ne)
+        else 
+          raise (TypeInattendu (texp, t))
+      end
+  | AstTds.Prototype(t,n,lt) -> failwith "erreur prototype non géré"
   
 
 (* analyser : AstTds.ast -> AstType.ast *)
@@ -255,8 +258,9 @@ let rec analyse_type_fonction (AstTds.Fonction(t,ia,lp,li,e))  =
 (* Vérifie la bonne utilisation des identifiants et tranforme le programme
 en un programme de type AstType.ast *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyser (AstTds.Programme (fonctions,prog)) =
-  let nlf = List.map analyse_type_fonction fonctions in 
-  let nb = List.map analyse_type_instruction prog in
-  Programme (nlf, nb)
+let analyser (AstTds.Programme (lf1,prog, lf2)) =
+  let nlf1 = List.map analyse_type_fonction lf1 in 
+  let nbloc = List.map analyse_type_instruction prog in
+  let nlf2 = List.map analyse_type_fonction lf2 in 
+  Programme (nlf1, nbloc, nlf2)
 end

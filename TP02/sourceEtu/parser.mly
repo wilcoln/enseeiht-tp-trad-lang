@@ -65,10 +65,18 @@ open Ast.AstSyntax
 main : lfi = prog EOF     {lfi}
 
 prog :
-| lf = fonc  lfi = prog   {let (Programme (lf1,li))=lfi in (Programme (lf::lf1,li))}
-| ID li = bloc            {Programme ([],li)}
+    (*| lf = fonc  lfi = prog   {let (Programme (lf1,li))=lfi in (Programme (lf::lf1,li))}
+    | ID li = bloc            {Programme ([],li)}*)
+    | ldfs1=dfs ID li=bloc ldfs2=dfs {Programme(ldfs1,li,ldfs2)}
 
-fonc : t=typ n=ID PO p=dp PF AO li=is RETURN exp=e PV AF {Fonction(t,n,p,li,exp)}
+dfs :                   
+    |                           {[]}
+    | d=decl ldfs=dfs           {d::ldfs} 
+    | f=fonc ldfs=dfs           {f::ldfs} 
+
+decl : t=typ n=ID PO lp=dp PF PV {let lt = fst (List.split lp) in Prototype(t,n,lt)}
+
+fonc : t=typ n=ID PO lp=dp PF AO li=is RETURN exp=e PV AF {Fonction(t,n,lp,li,exp)}
 
 bloc : AO li = is AF      {li}
 

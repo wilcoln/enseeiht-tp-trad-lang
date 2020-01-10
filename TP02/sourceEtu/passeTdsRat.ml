@@ -231,41 +231,44 @@ let analyse_tds_parametre tds (ptype, pnom) =
 (* Vérifie la bonne utilisation des identifiants et tranforme la fonction
 en une fonction de type AstTds.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let rec analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li,e))  =
-  begin
-    match chercherLocalement maintds n with 
-    | None ->
-      begin
-        let tdsfonc = creerTDSFille maintds in 
-        let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-        let info = InfoFun(n, t, (fst (List.split lp))::[]) in 
-        let ia = info_to_info_ast info in
-        ajouter tdsfonc n ia;
-        ajouter maintds n ia;
-        let nli = List.map (analyse_tds_instruction tdsfonc) li in
-        let ne = analyse_tds_expression tdsfonc e in 
-        Fonction(t, ia, nlp , nli, ne)
-      end
-    | Some ia -> (** TODO : à changer *)
+let rec analyse_tds_fonction maintds fonction  =
+  match fonction with 
+  | AstSyntax.Fonction(t,n,lp,li,e) -> 
     begin
-      match info_ast_to_info ia with
-        | InfoFun(_, _, ltl) -> 
-          let lt = (fst (List.split lp)) in 
-          if not (List.mem  lt ltl) then
-          begin
-            let tdsfonc = creerTDSFille maintds in 
-            let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-            ajouter_surcharge lt ia;
-            ajouter tdsfonc n ia;
-            ajouter maintds n ia;
-            let nli = List.map (analyse_tds_instruction tdsfonc) li in
-            let ne = analyse_tds_expression tdsfonc e in 
-            Fonction(t, ia, nlp , nli, ne)
-          end
-          else raise (DoubleDeclaration n)
-        | _ -> raise (MauvaiseUtilisationIdentifiant n) (**TODO:  Leer une exception plus pertinente*)
-  end
-  end
+      match chercherLocalement maintds n with 
+      | None ->
+        begin
+          let tdsfonc = creerTDSFille maintds in 
+          let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
+          let info = InfoFun(n, t, (fst (List.split lp))::[]) in 
+          let ia = info_to_info_ast info in
+          ajouter tdsfonc n ia;
+          ajouter maintds n ia;
+          let nli = List.map (analyse_tds_instruction tdsfonc) li in
+          let ne = analyse_tds_expression tdsfonc e in 
+          Fonction(t, ia, nlp , nli, ne)
+        end
+      | Some ia -> (** TODO : à changer *)
+        begin
+          match info_ast_to_info ia with
+            | InfoFun(_, _, ltl) -> 
+              let lt = (fst (List.split lp)) in 
+              if not (List.mem lt ltl) then
+              begin
+                let tdsfonc = creerTDSFille maintds in 
+                let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
+                ajouter_surcharge lt ia;
+                ajouter tdsfonc n ia;
+                ajouter maintds n ia;
+                let nli = List.map (analyse_tds_instruction tdsfonc) li in
+                let ne = analyse_tds_expression tdsfonc e in 
+                Fonction(t, ia, nlp , nli, ne)
+              end
+              else raise (DoubleDeclaration n)
+            | _ -> raise (MauvaiseUtilisationIdentifiant n) (**TODO:  Leer une exception plus pertinente*)
+        end
+    end
+  | AstSyntax.Prototype(t,n,lt) -> failwith "erreur prototype non géré"
   
 
 (* analyser : AstSyntax.ast -> AstTds.ast *)
@@ -273,9 +276,10 @@ let rec analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li,e))  =
 (* Vérifie la bonne utilisation des identifiants et tranforme le programme
 en un programme de type AstTds.ast *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyser (AstSyntax.Programme (fonctions,prog)) =
+let analyser (AstSyntax.Programme (lf1, prog, lf2)) =
   let tds_mere = creerTDSMere () in 
-  let nfonctions = List.map (analyse_tds_fonction tds_mere) fonctions in 
+  let nlf1 = List.map (analyse_tds_fonction tds_mere) lf1 in 
   let nbloc = List.map (analyse_tds_instruction tds_mere) prog in
-  Programme (nfonctions, nbloc)
+  let nlf2 = List.map (analyse_tds_fonction tds_mere) lf2 in 
+  Programme (nlf1, nbloc, nlf2)
 end

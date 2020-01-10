@@ -79,18 +79,23 @@ let rec analyse_placement_parametres lpia =
      end
 
 (* analyse_placement_fonction : AstType.fonction -> AstPlacement.fonction *)
-let analyse_placement_fonction (AstType.Fonction(ia,lpia,li,e)) = 
-  let _ = analyse_placement_parametres lpia in
-  let _ = analyse_placement_bloc 3 "LB" li in
-  match info_ast_to_info ia with
-  | InfoFun(_, t, _) -> (getTaille t, Fonction(ia, lpia, li, e))
-  | _ -> failwith "error analyse placement fonction"
+let analyse_placement_fonction fonction = 
+  match fonction with 
+  | AstType.Fonction(ia,lpia,li,e) ->
+    begin 
+      let _ = analyse_placement_parametres lpia in
+      let _ = analyse_placement_bloc 3 "LB" li in
+      match info_ast_to_info ia with
+      | InfoFun(_, t, _) -> (getTaille t, Fonction(ia, lpia, li, e))
+      | _ -> failwith "error analyse placement fonction"
+    end
+  | AstType.Prototype(ia) -> failwith "erreur gestion prototype"
 
 (* analyser : AstType.ast -> AstPlacement.ast *)
-let analyser (AstType.Programme (fonctions,prog)) =
+let analyser (AstType.Programme (lf1 ,prog, lf2)) =
   (*let (taillesFonctions, nFonctions) = List.split (analyse_placement_fonctions 0 "SB" fonctions) in*)
-  let (tailleResultatFonctions,nFonctions) = List.split(List.map (analyse_placement_fonction) fonctions) in 
-  let _ = List.fold_right (+) tailleResultatFonctions 0 in
+  let (_, nlf1) = List.split(List.map (analyse_placement_fonction) lf1) in 
+  let (_, nlf2) = List.split(List.map (analyse_placement_fonction) lf2) in
   let _ = analyse_placement_bloc 0 "SB" prog in
-  Programme (nFonctions, prog)
+  Programme (nlf1, prog, nlf2)
 end
