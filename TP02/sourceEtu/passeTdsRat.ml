@@ -15,7 +15,7 @@ struct
 
 (* analyse_tds_affectable : AstSyntax.affectable -> AstTds.affectable *)
 (* Paramètre tds : la table des symboles courante *)
-(* Paramètre e : l'affectable à analyser *)
+(* Paramètre a : l'affectable à analyser *)
 (* Vérifie la bonne utilisation des identifiants et tranforme l'affectable
 en une affectable de type AstTds.affectable *)
 (* Erreur si mauvaise utilisation des identifiants *)
@@ -213,13 +213,18 @@ and analyse_tds_bloc tds li =
   Cette tds est modifiée par effet de bord *)
   List.map (analyse_tds_instruction tdsbloc) li
 
-let analyse_tds_parametre tds (ptype, pnom) = 
-  match chercherLocalement tds pnom with 
+(* analyse_tds_parametre : AstSyntax.parametre -> AstTds.parametre *)
+(* Paramètre tdsfonc : la table des symboles d'une fonction *)
+(* Paramètre (ptype, pnom) : le paramètre à analyser (son type, son nom) *)
+(* Vérie que le nom du paramètre est unique et crée une infoVar associé  *)
+(* Erreur si mauvaise utilisation des identifiants *)
+let analyse_tds_parametre tdsfonc (ptype, pnom) = 
+  match chercherLocalement tdsfonc pnom with 
     | None -> 
       begin
         let info  = InfoVar(pnom, ptype, 0, "") in
         let pia = info_to_info_ast info in
-        ajouter tds pnom pia;
+        ajouter tdsfonc pnom pia;
         (ptype, pia)
       end      
     | Some _ -> raise (DoubleDeclaration pnom)
@@ -237,70 +242,99 @@ let rec analyse_tds_fonction maintds fonction  =
     begin
       match chercherLocalement maintds n with 
       | None ->
+        (* Aucune info n'est associée à cet identifiant *)
         begin
+          (* On crée une tds locale à la fonction *)
           let tdsfonc = creerTDSFille maintds in 
-          let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-          let info = InfoFun(n, t, ((fst (List.split lp)), true)::[]) in 
+          (* On récupère la signature de la fonction *)
+          let lt = fst (List.split lp) in 
+          (* On crée une InfoFun et on initialise la liste des signatures avec la signature de la fonction *)
+          (* Le booléan associé à cet signature est à true car on fournit une implémentation de la fonction *)
+          let info = InfoFun(n, t, (lt, true)::[]) in 
           let ia = info_to_info_ast info in
-          ajouter tdsfonc n ia;
+          (* On rajoute l'info dans la tds globale *)
           ajouter maintds n ia;
+          (* On rajoute l'info dans la tds locale, pour permettre les appels récursifs *)
+          ajouter tdsfonc n ia;
+          let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
           let nli = List.map (analyse_tds_instruction tdsfonc) li in
           let ne = analyse_tds_expression tdsfonc e in 
           Fonction(t, ia, nlp , nli, ne)
         end
-      | Some ia -> (** TODO : à changer *)
+      | Some ia ->
+        (* Une Info est déjà associée à cet identifiant *)
         begin
           match info_ast_to_info ia with
             | InfoFun(_, _, bltl) -> 
-              let lt = (fst (List.split lp)) in 
+              (* On récupère la signature de la fonction *)
+              let lt = fst (List.split lp) in 
               if not (List.mem_assoc lt bltl) then
+                (* La signature ne se trouve pas dans l'info *)
                 begin
                   let tdsfonc = creerTDSFille maintds in 
-                  let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-                  ajouter_surcharge (lt, true) ia;
-                  ajouter tdsfonc n ia;
+                  (* On rajoute la signature dans l'info *)
+                  (* Le booléan associé à cet signature est à true car on fournit une implémentation de la fonction *)
+                  ajouter_signature (lt, true) ia;
+                  (* On rajoute l'info dans la tds globale *)
                   ajouter maintds n ia;
+                  (* On rajoute l'info dans la tds locale, pour permettre les appels récursifs *)
+                  ajouter tdsfonc n ia;
+                  let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
                   let nli = List.map (analyse_tds_instruction tdsfonc) li in
                   let ne = analyse_tds_expression tdsfonc e in 
                   Fonction(t, ia, nlp , nli, ne)
                 end
               else 
+              (* La signature se trouve déjà dans l'info *)
                 if not (List.assoc lt bltl) then 
+                  (* L'implémentation de la fonction n'est pas fournie *)
                   begin
+                    (* On crée une tds locale à la fonction *)
                     let tdsfonc = creerTDSFille maintds in 
-                    let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
+                    (* On rajoute l'info dans la tds locale, pour permettre les appels récursifs *)
                     ajouter tdsfonc n ia;
+                    let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
                     let nli = List.map (analyse_tds_instruction tdsfonc) li in
                     let ne = analyse_tds_expression tdsfonc e in 
                     Fonction(t, ia, nlp , nli, ne)
                   end
                 else raise (DoubleDeclaration n)
-            | _ -> raise (MauvaiseUtilisationIdentifiant n) (**TODO:  Leer une exception plus pertinente*)
+            | _ -> raise (MauvaiseUtilisationIdentifiant n)
         end
     end
   | AstSyntax.Prototype(t,n,lt) ->
-  begin
-    match chercherLocalement maintds n with 
-    | None ->
-      begin
-        let info = InfoFun(n, t, (lt, false)::[]) in 
-        let ia = info_to_info_ast info in
-        ajouter maintds n ia;
-        Prototype(ia)
-      end
-    | Some ia -> (** TODO : à changer *)
-      begin
-        match info_ast_to_info ia with
-          | InfoFun(_, _, bltl) -> 
-            if not (List.mem_assoc lt bltl) then
-            begin
-              ajouter_surcharge (lt, false) ia;
-              ajouter maintds n ia;
-              Prototype(ia)
-            end
-            else raise (DoubleDeclarationPrototype n)
-          | _ -> raise (MauvaiseUtilisationIdentifiant n) (**TODO:  Lier une exception plus pertinente*)
-      end
+    begin
+      match chercherLocalement maintds n with 
+      | None ->
+        (* Aucune info n'est associée à cet identifiant *)
+        begin
+          (* On crée une InfoFun et on initialise la liste des signatures avec la signature du prototype *)
+          let info = InfoFun(n, t, (lt, false)::[]) in 
+          let ia = info_to_info_ast info in
+          (* On rajoute l'info_ast dans la tds globale *)
+          ajouter maintds n ia;
+          Prototype(ia)
+        end
+      | Some ia ->
+        (* Une info est déjà associée à cet identifiant *)
+        begin
+          match info_ast_to_info ia with
+            | InfoFun(_, _, bltl) -> 
+              if not (List.mem_assoc lt bltl) then
+              (* La signature ne se trouve pas dans l'info *)
+                begin
+                  (* On rajoute la signature dans l'info *)
+                  (* Le booléan associé à cet signature est à false car l'implémentation de la fonction n'est pas encore fournie *)
+                  ajouter_signature (lt, false) ia;
+                  (* On rajoute l'info_ast dans la tds globale *)
+                  ajouter maintds n ia;
+                  Prototype(ia)
+                end
+              else
+                (* La signature se trouve déjà dans l'info *)
+                raise (DoubleDeclarationPrototype n)
+            | _ -> raise (MauvaiseUtilisationIdentifiant n)
+        end
   end
   
 

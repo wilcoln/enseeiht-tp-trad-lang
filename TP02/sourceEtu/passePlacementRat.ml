@@ -31,7 +31,7 @@ let rec analyse_placement_instruction dep base i =
             modifier_adresse_info dep base ia;
             (getTaille t, i)
           end
-        | _ -> failwith "variable not found"
+        | _ -> raise ErreurInterne
       end
   | AstType.Conditionnelle (c, bthen,belse) ->
       begin 
@@ -75,7 +75,7 @@ let rec analyse_placement_parametres lpia =
           let _ = modifier_adresse_info (-tailleq-taillet) "LB" tia in 
           taillet + tailleq
          end
-      | _ -> failwith "erreur analyse placemnet paramètre"
+      | _ -> raise ErreurInterne
      end
 
 (* analyse_placement_fonction : AstType.fonction -> AstPlacement.fonction *)
@@ -89,7 +89,7 @@ let analyse_placement_fonction fonction =
       | InfoFun(_, t, _) -> (getTaille t, Fonction(ia, lpia, li, e))
       | _ -> failwith "error analyse placement fonction"
     end
-  | AstType.Prototype(ia) -> (0, Prototype(ia))
+  | _ -> (0, Empty)
 
 (* analyser : AstType.ast -> AstPlacement.ast *)
 let analyser (AstType.Programme (lf1 ,prog, lf2)) =

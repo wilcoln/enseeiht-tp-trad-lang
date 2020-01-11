@@ -149,7 +149,7 @@ let%expect_test "surcharge" =
 
   [%expect{| 12 |}]
 
-let%expect_test "code_protototype" = 
+let%expect_test "code_prototype" = 
   runtam "../../fichiersRat/testPrototype.rat";
 
   [%expect{| 5[2/3] |}]

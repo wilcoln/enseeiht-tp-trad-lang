@@ -111,7 +111,7 @@ e :
 | TRUE                    {True}
 | FALSE                   {False}
 | e=ENTIER                {Entier e}
-| s=CHAINE                {let trimStr = (String.sub s 1 ((String.length s)-2)) in Chaine trimStr}
+| s=CHAINE                {Chaine (String.sub s 1 ((String.length s)-2))}
 | PO e1=e AO e2=e VIRG e3=e AF PF {SousChaine (e1,e2,e3)}
 | LENGTH e1=e             {Longueur (e1)}
 | PO e1=e PLUS e2=e PF    {Binaire (Plus,e1,e2)}

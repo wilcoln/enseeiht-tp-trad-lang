@@ -301,7 +301,7 @@ type bloc = instruction list
 
 (* nom, liste des paramètres, corps, expression de retour, informations associées à l'identificateur *)
 type fonction = 
-  | Prototype of Tds.info_ast
+  | Empty (* Les noeuds ayant disparus: Prototype *)
   | Fonction of Tds.info_ast * Tds.info_ast list * instruction list * expression 
 
 (* Structure d'un programme dans notre langage *)
@@ -341,8 +341,8 @@ type bloc = instruction list
 (* nom, corps, expression de retour, informations associées à l'identificateur *)
 (* Plus besoin de la liste des paramètres mais on la garde pour les tests du placements mémoire *)
 type fonction = 
-  | Prototype of Tds.info_ast
-  | Fonction of Tds.info_ast * Tds.info_ast list * instruction list * expression 
+  | Empty (* Les noeuds ayant disparus: Prototype *)
+  | Fonction of Tds.info_ast * Tds.info_ast list * instruction list * expression
 (* Structure d'un programme dans notre langage *)
 type programme = Programme of fonction list * bloc * fonction list
 

@@ -55,8 +55,8 @@ val info_ast_to_info : info_ast -> info
 (* Modifie le type si c'est une InfoVar, ne fait rien sinon *)
 val modifier_type_info : typ -> info_ast -> unit
 
-(* Ajoute surcharge, prise en compte d'une nouvelle list de type de paramètres *)
-val ajouter_surcharge : typ list * bool -> info_ast -> unit
+(* Ajoute signature, prise en compte d'une nouvelle list de type de paramètres *)
+val ajouter_signature : typ list * bool -> info_ast -> unit
 
 (* Modifie les types de retour et des paramètres si c'est une InfoFun, ne fait rien sinon *)
 val modifier_type_fonction_info : typ -> typ list -> info_ast -> unit

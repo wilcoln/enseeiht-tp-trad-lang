@@ -74,10 +74,10 @@ let afficher_globale tds =
     |InfoVar (n,_,dep,base) -> i:= InfoVar (n,t,dep,base)
     | _ -> failwith "Appel modifier_type_info pas sur un InfoVar"
  
-let ajouter_surcharge (lt, impl) i = 
+let ajouter_signature (lt, impl) i = 
     match !i with
     |InfoFun(n,t,bltl) -> i:= InfoFun(n,t,(lt, impl)::bltl)
-    | _ -> failwith "Appel ajouter surcharge pas sur un InfoFun"
+    | _ -> failwith "Appel ajouter la signature pas sur un InfoFun"
 
  let modifier_type_fonction_info t tp i =
        match !i with

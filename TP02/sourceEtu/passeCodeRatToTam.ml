@@ -17,7 +17,7 @@ struct
 
 
   (* Convertit de la chaine en list de sous chaine d'1 caractère *)
-  let str_explode s =
+  let str_split s =
     let rec exp i l =
       if i < 0 then l else exp (i - 1) ((sub s i 1) :: l) in
     exp (String.length s - 1) []
@@ -29,7 +29,7 @@ struct
       match info_ast_to_info ia with
         | InfoVar(n, t, base, reg) -> "LOAD ("^(string_of_int (getTaille t))^") "^(string_of_int base)^"["^reg^"]\n" 
         | InfoConst(n, v) -> "LOADL "^(string_of_int v)^"\n"
-        | _ -> failwith "erreur generation code identifiant"
+        | _ -> ""
       end
     | Contenu (a, tp) ->
       begin 
@@ -47,7 +47,7 @@ struct
               let cle = List.fold_right (fun t tq -> (analyse_code_expression t)^tq) le "" in 
               cle^"CALL (SB) "^n^unique_suffix^"\n"
             end
-          | _ -> failwith "erreur generation code appel fonction"
+          | _ -> ""
       end
       | Affectable a -> analyse_code_affectable a
       | Null -> "SUBR MVoid\n"
@@ -56,7 +56,7 @@ struct
            begin 
             match info_ast_to_info ia with 
             | InfoVar(n, t, base, reg) -> "LOADA "^(string_of_int base)^"["^reg^"]\n"
-            | _ -> failwith "erreur"
+            | _ -> ""
            end
     | Rationnel (e1, e2) -> 
       begin
@@ -77,12 +77,16 @@ struct
     | True -> "LOADL 1\nSUBR I2B\n"
     | False -> "LOADL 0\nSUBR I2B\n"
     | Entier (i) -> "LOADL "^(string_of_int i)^"\n"
-    | Chaine s -> (**TODO à améliorer : LB?? , libération de mémoire *)
+    | Chaine s ->
       begin
         let taille_chaine = length s in 
-        let cts = "LOADL "^(string_of_int (1 + taille_chaine))^"\n" in 
-        let ctc = "LOADL "^(string_of_int taille_chaine)^"\n" in 
-        let lst = str_explode s in cts^"SUBR MAlloc\n"^ctc^(List.fold_right (fun t tq -> "LOADL '"^t^"'\n"^tq) lst "")^"LOAD (1) -"^(string_of_int (2 + taille_chaine))^"[ST]\nSTOREI ("^(string_of_int (1 + taille_chaine))^")\n"
+        let lst = str_split s in
+        "LOADL "^(string_of_int (1 + taille_chaine))^"\n"^
+        "SUBR MAlloc\n"^
+        "LOADL "^(string_of_int taille_chaine)^"\n"^
+        (List.fold_right (fun t tq -> "LOADL '"^t^"'\n"^tq) lst "")^
+        "LOAD (1) -"^(string_of_int (2 + taille_chaine))^"[ST]\n"^
+        "STOREI ("^(string_of_int (1 + taille_chaine))^")\n"
       end
     | SousChaine (e1, e2, e3) ->
       begin
@@ -121,7 +125,7 @@ and analyse_code_instruction i =
               let ce = analyse_code_expression e in 
               "PUSH "^(string_of_int (getTaille t))^"\n"^ce^"STORE ("^(string_of_int (getTaille t))^") "^(string_of_int base)^"["^reg^"]\n"
               end
-          | _ -> failwith "erreur generation code instruction"
+          | _ -> ""
         end
     | Affectation (a, e) ->
         begin
@@ -144,7 +148,7 @@ and analyse_code_instruction i =
                     | _ -> ""
                   end
                 | Contenu (ap, _) -> aux ap acc^"LOADI (1)\n" in 
-              ce^(aux a "")^"STOREI ("^(string_of_int (getTaille tp))^")\n"
+                  ce^(aux a "")^"STOREI ("^(string_of_int (getTaille tp))^")\n"
             end
         end
     | AffichageInt e -> let ce = analyse_code_expression e in ce^"SUBR IOut\n"
@@ -177,10 +181,13 @@ let analyse_code_fonction fonction =
   | Fonction(ia, lpia, li, e) -> 
       begin
         match info_ast_to_info ia with 
-        | InfoFun(n,t,bltl) -> 
+        | InfoFun(n,t,_) -> 
           begin
-            let lt = List.map (fun pia -> match info_ast_to_info pia with |InfoVar(_,t,_,_) -> t | _ -> failwith "internal error") lpia in
+            (* On récupère la signature de la fonction *)
+            let lt = List.map (fun pia -> match info_ast_to_info pia with | InfoVar(_,t,_,_) -> t | _ -> raise ErreurInterne ) lpia in
+            (* On crée un suffix unique pour cette signature *)
             let unique_suffix = List.fold_right (fun te tq -> (string_of_type te)^tq) lt "" in
+            (* On crée le label de la fonction en utilisant le suffix unique précédent *)
             let labelFonction = n^unique_suffix in 
             let code_bloc = analyse_code_bloc li in
             let ce = analyse_code_expression e in
@@ -188,7 +195,7 @@ let analyse_code_fonction fonction =
           end
         | _ -> ""
         end
-  | Prototype(ia) -> ""
+  | _ -> ""
 
 let analyser (Programme (lf1, prog, lf2)) =
   let code_fonctions1 = List.fold_right (fun f tq -> (analyse_code_fonction f)^tq) lf1 "" in
