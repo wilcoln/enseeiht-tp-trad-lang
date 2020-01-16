@@ -203,6 +203,6 @@ let analyser (Programme (lf1, prog, lf2)) =
   let label_main = "main;" in
   let code_fonctions2 = List.fold_right (fun f tq -> (analyse_code_fonction f)^tq) lf2 "" in
   let code_tam = code_fonctions1^code_fonctions2^label_main^"\n"^code_programme^"HALT" in 
-  (* print_endline code_tam; *)
+  print_endline code_tam;
   (getEntete () )^code_tam
 end

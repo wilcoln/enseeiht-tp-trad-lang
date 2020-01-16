@@ -1,14 +1,6 @@
 main{
 int * px = (new int);
-int ** ppx = &px;
 int x = 3;
 px = &x;
 int y = (*px);
-(*px) = 5;
-rat * pr = (new rat);
-rat r = [1/2];
-pr = &r;
-rat ** ppr = &pr;
-print (*(*ppr));
-print (*(*ppx));
 }

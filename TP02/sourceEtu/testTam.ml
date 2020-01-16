@@ -26,10 +26,11 @@ let runtamcode cmde ratfile =
   output_string chan tamcode;
   close_out chan;
   let ic = Unix.open_process_in (cmde ^ " " ^ tamfile) in
-  let printed = load_chan ic in
+  (* let printed = load_chan ic in *)
+  let printed = input_line ic in 
   close_in ic;
   Sys.remove tamfile;    (* à commenter si on veut étudier le code TAM. *)
-  remove_blanks printed
+  String.trim printed
 
 (* Compile and run ratfile, and compare its output to the expected output *)
 let compareoutputstring ratfile expected =
