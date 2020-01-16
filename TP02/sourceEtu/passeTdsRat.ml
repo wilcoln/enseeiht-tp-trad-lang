@@ -12,14 +12,12 @@ struct
   type t2 = Ast.AstTds.programme
 
 
-
 (* analyse_tds_affectable : AstSyntax.affectable -> AstTds.affectable *)
 (* Paramètre tds : la table des symboles courante *)
 (* Paramètre a : l'affectable à analyser *)
 (* Vérifie la bonne utilisation des identifiants et tranforme l'affectable
-en une affectable de type AstTds.affectable *)
+en un affectable de type AstTds.affectable *)
 (* Erreur si mauvaise utilisation des identifiants *)
-
   let rec analyse_tds_affectable tds a = 
     match a with 
     | AstSyntax.Ident (n) ->
@@ -27,13 +25,17 @@ en une affectable de type AstTds.affectable *)
           match chercherGlobalement tds n with
               | None -> raise (IdentifiantNonDeclare n)
               | Some ia -> 
-              begin
-                match info_ast_to_info ia with
-                | InfoFun(_) -> raise (MauvaiseUtilisationIdentifiant n)
-                | _ -> Ident(ia)
-              end
+                begin
+                  match info_ast_to_info ia with
+                  | InfoFun(_) -> raise (MauvaiseUtilisationIdentifiant n)
+                  | _ -> Ident(ia)
+                end
       end
-    | AstSyntax.Contenu (a) -> let na = analyse_tds_affectable tds a in Contenu(na)
+    | AstSyntax.Contenu (a) -> 
+      begin 
+        let na = analyse_tds_affectable tds a in
+        Contenu(na)
+      end
 
 
 (* analyse_tds_expression : AstSyntax.expression -> AstTds.expression *)
@@ -42,7 +44,6 @@ en une affectable de type AstTds.affectable *)
 (* Vérifie la bonne utilisation des identifiants et tranforme l'expression
 en une expression de type AstTds.expression *)
 (* Erreur si mauvaise utilisation des identifiants *)
-
 let rec analyse_tds_expression tds e = 
 match e with
     | AstSyntax.AppelFonction (n, le) -> 
@@ -67,6 +68,11 @@ match e with
             let ne = analyse_tds_expression tds e in
             Numerateur(ne)
         end
+    | AstSyntax.Denominateur (e) ->
+        begin
+            let ne = analyse_tds_expression tds e in
+            Denominateur(ne)
+        end
     | AstSyntax.Affectable (a) -> 
       begin 
         let na = analyse_tds_affectable tds a in 
@@ -78,18 +84,22 @@ match e with
       begin
         match chercherGlobalement tds n with
         | None -> raise (IdentifiantNonDeclare n)
-        | Some ia -> Adresse (ia)
+        | Some ia -> 
+          begin
+            match info_ast_to_info ia with 
+            | InfoVar(_) -> Adresse (ia)
+            | _ -> raise (MauvaiseUtilisationIdentifiant n)
+          end
       end
-    | AstSyntax.Denominateur (e) ->
-        begin
-            let ne = analyse_tds_expression tds e in
-            Denominateur(ne)
-        end
     | AstSyntax.True -> True
     | AstSyntax.False -> False
     | AstSyntax.Entier (i) -> Entier (i)
     | AstSyntax.Chaine (s) -> Chaine (s)
-    | AstSyntax.Longueur (e) -> let ne = analyse_tds_expression tds e in Longueur (ne)
+    | AstSyntax.Longueur (e) -> 
+      begin 
+        let ne = analyse_tds_expression tds e in
+        Longueur (ne)
+      end
     | AstSyntax.SousChaine (e1,e2,e3) ->
         begin
           let ne1 = analyse_tds_expression tds e1 in 
@@ -150,8 +160,8 @@ let rec analyse_tds_instruction tds i =
                     (* Vérification de la bonne utilisation des identifiants dans l'expression *)
                     (* et obtention de l'expression transformée *) 
                     let ne = analyse_tds_expression tds e in
-                    (* Renvoie de la nouvelle affectation où le nom a été remplacé par l'information 
-                    et l'expression remplacée par l'expression issue de l'analyse *)
+                    (* Renvoie la nouvelle affectation où le nom a été remplacé par l'information 
+                    et l'expression remplacée par la nouvelle expression issue de l'analyse *)
                     Affectation (na, ne)
                   end
                 |  InfoFun(n,_,_) -> raise (MauvaiseUtilisationIdentifiant n)
@@ -201,7 +211,7 @@ let rec analyse_tds_instruction tds i =
       
 (* analyse_tds_bloc : AstSyntax.bloc -> AstTds.bloc *)
 (* Paramètre tds : la table des symboles courante *)
-(* Paramètre li : liste d'instructions à analyser *)
+(* Paramètre li : la liste d'instructions à analyser *)
 (* Vérifie la bonne utilisation des identifiants et tranforme le bloc
 en un bloc de type AstTds.bloc *)
 (* Erreur si mauvaise utilisation des identifiants *)
@@ -213,11 +223,12 @@ and analyse_tds_bloc tds li =
   Cette tds est modifiée par effet de bord *)
   List.map (analyse_tds_instruction tdsbloc) li
 
+
 (* analyse_tds_parametre : AstSyntax.parametre -> AstTds.parametre *)
 (* Paramètre tdsfonc : la table des symboles d'une fonction *)
 (* Paramètre (ptype, pnom) : le paramètre à analyser (son type, son nom) *)
 (* Vérie que le nom du paramètre est unique et crée une infoVar associé  *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Erreur si double déclaration du paramètre *)
 let analyse_tds_parametre tdsfonc (ptype, pnom) = 
   match chercherLocalement tdsfonc pnom with 
     | None -> 
@@ -265,44 +276,54 @@ let rec analyse_tds_fonction maintds fonction  =
         (* Une Info est déjà associée à cet identifiant *)
         begin
           match info_ast_to_info ia with
-            | InfoFun(_, _, bltl) -> 
-              (* On récupère la signature de la fonction *)
-              let lt = fst (List.split lp) in 
-              if not (List.mem_assoc lt bltl) then
-                (* La signature ne se trouve pas dans l'info *)
-                begin
-                  let tdsfonc = creerTDSFille maintds in 
-                  (* On rajoute la signature dans l'info *)
-                  (* Le booléan associé à cet signature est à true car on fournit une implémentation de la fonction *)
-                  ajouter_signature (lt, true) ia;
-                  (* On rajoute l'info dans la tds globale *)
-                  ajouter maintds n ia;
-                  (* On rajoute l'info dans la tds locale, pour permettre les appels récursifs *)
-                  ajouter tdsfonc n ia;
-                  let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
-                  let nli = List.map (analyse_tds_instruction tdsfonc) li in
-                  let ne = analyse_tds_expression tdsfonc e in 
-                  Fonction(t, ia, nlp , nli, ne)
-                end
-              else 
-              (* La signature se trouve déjà dans l'info *)
-                if not (List.assoc lt bltl) then 
-                  (* L'implémentation de la fonction n'est pas fournie *)
-                  begin
-                    (* On crée une tds locale à la fonction *)
+            | InfoFun _ -> 
+              begin
+                (* On récupère la signature de la fonction *)
+                let lt = fst (List.split lp) in 
+                match chercher_signature lt ia with 
+                | None -> 
+                  begin 
+                    (* La signature ne se trouve pas dans l'info *)
                     let tdsfonc = creerTDSFille maintds in 
+                    (* On rajoute l'info dans la tds globale *)
+                    ajouter maintds n ia;
                     (* On rajoute l'info dans la tds locale, pour permettre les appels récursifs *)
                     ajouter tdsfonc n ia;
                     let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
                     let nli = List.map (analyse_tds_instruction tdsfonc) li in
                     let ne = analyse_tds_expression tdsfonc e in 
+                    
+                    (* On rajoute la signature dans l'info *)
+                    (* Le booléan associé à cet signature est à true car on fournit une implémentation de la fonction *)
+                    ajouter_signature (lt, true) ia;
+
                     Fonction(t, ia, nlp , nli, ne)
                   end
-                else raise (DoubleDeclaration n)
+                | Some impl -> 
+                  begin
+                  (* La signature se trouve déjà dans l'info *)
+                    if not impl then 
+                      (* L'implémentation de la fonction n'est pas fournie *)
+                      begin
+                        (* On crée une tds locale à la fonction *)
+                        let tdsfonc = creerTDSFille maintds in 
+                        (* On rajoute l'info dans la tds locale, pour permettre les appels récursifs *)
+                        ajouter tdsfonc n ia;
+                        let nlp = List.map (analyse_tds_parametre tdsfonc) lp in
+                        let nli = List.map (analyse_tds_instruction tdsfonc) li in
+                        let ne = analyse_tds_expression tdsfonc e in 
+                        (* la signature est maintenant implémentée donc on met à jour l'info ast *)
+                        implementer_signature lt ia;
+                        (* On renvoie la nouvelle fonction *)
+                        Fonction(t, ia, nlp , nli, ne)
+                      end
+                    else raise (DoubleDeclaration n)
+                end 
+              end
             | _ -> raise (MauvaiseUtilisationIdentifiant n)
         end
     end
-  | AstSyntax.Prototype(t,n,lt) ->
+  | AstSyntax.Prototype(t, n, lt) ->
     begin
       match chercherLocalement maintds n with 
       | None ->
@@ -319,30 +340,34 @@ let rec analyse_tds_fonction maintds fonction  =
         (* Une info est déjà associée à cet identifiant *)
         begin
           match info_ast_to_info ia with
-            | InfoFun(_, _, bltl) -> 
-              if not (List.mem_assoc lt bltl) then
-              (* La signature ne se trouve pas dans l'info *)
-                begin
-                  (* On rajoute la signature dans l'info *)
-                  (* Le booléan associé à cet signature est à false car l'implémentation de la fonction n'est pas encore fournie *)
-                  ajouter_signature (lt, false) ia;
-                  (* On rajoute l'info_ast dans la tds globale *)
-                  ajouter maintds n ia;
-                  Prototype(ia)
-                end
-              else
-                (* La signature se trouve déjà dans l'info *)
-                raise (DoubleDeclarationPrototype n)
+            | InfoFun _ -> 
+              begin 
+                match chercher_signature lt ia with 
+                | None -> 
+                  begin 
+                    (* La signature ne se trouve pas dans l'info *)
+                    (* On rajoute la signature dans l'info *)
+                    (* Le booléan associé à cet signature est à false car l'implémentation de la fonction n'est pas encore fournie *)
+                    ajouter_signature (lt, false) ia;
+                    (* On rajoute l'info_ast dans la tds globale *)
+                    ajouter maintds n ia;
+                    Prototype(ia)
+                  end
+                | Some _ -> 
+                  begin 
+                    (* La signature se trouve déjà dans l'info *)
+                    raise (DoubleDeclarationSignature (n, lt))
+                  end 
+              end
             | _ -> raise (MauvaiseUtilisationIdentifiant n)
         end
   end
   
 
-(* analyser : AstSyntax.ast -> AstTds.ast *)
+(* analyser : AstSyntax.programme -> AstTds.programme *)
 (* Paramètre : le programme à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme le programme
-en un programme de type AstTds.ast *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Analyse le premier bloc de fonctions, le programme puis le deuxième bloc de fonctions et tranforme le programme
+en un programme de type AstType.programme *)
 let analyser (AstSyntax.Programme (lf1, prog, lf2)) =
   let tds_mere = creerTDSMere () in 
   let nlf1 = List.map (analyse_tds_fonction tds_mere) lf1 in 

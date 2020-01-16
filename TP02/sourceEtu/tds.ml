@@ -5,7 +5,9 @@ open Type
 type info =
   | InfoConst of string * int
   | InfoVar of string * typ * int * string
-  | InfoFun of string * typ * (typ list * bool) list (** double list pour prise en compte de la surcharge, bool = corps est fourni ?*)
+  | InfoFun of string * typ * (typ list * bool) list 
+  (** double list pour prendre en compte plusieurs signatures, 
+  le booléan associé à une signature indique si elle est implémentée ou pas *)
 
 (* Données stockées dans la tds  et dans les AST : pointeur sur une information *)
 type info_ast = info ref  
@@ -49,7 +51,7 @@ let string_of_info info =
   match info with
   | InfoConst (n,value) -> "Constante "^n^" : "^(string_of_int value)
   | InfoVar (n,t,dep,base) -> "Variable "^n^" : "^(string_of_type t)^" "^(string_of_int dep)^"["^base^"]"
-  | InfoFun (n,t, bltl) -> let ltl = (fst (List.split bltl)) in "Fonction "^n^" : "^(List.fold_right (fun tp tplq -> (List.fold_right (fun elt tq -> if tq = "" then (string_of_type elt) else (string_of_type elt)^" * "^tq) tp "" )^"\n"^tplq) ltl "")^
+  | InfoFun (n,t, bltl) -> "Fonction "^n^" : "^(List.fold_right (fun (tp,impl) tplq -> "(impl : "^(string_of_bool impl)^") "^(List.fold_right (fun elt tq -> if tq = "" then (string_of_type elt) else (string_of_type elt)^" * "^tq) tp "" )^"\n"^tplq) bltl "")^
                       " -> "^(string_of_type t)
 
 
@@ -78,6 +80,25 @@ let ajouter_signature (lt, impl) i =
     match !i with
     |InfoFun(n,t,bltl) -> i:= InfoFun(n,t,(lt, impl)::bltl)
     | _ -> failwith "Appel ajouter la signature pas sur un InfoFun"
+
+
+let implementer_signature lt i = 
+    match !i with
+    |InfoFun(n,t,bltl) -> i:= InfoFun(n,t,(lt, true)::(List.remove_assoc lt bltl))
+    | _ -> failwith "Appel ajouter la signature pas sur un InfoFun"
+
+
+let chercher_signature lt i = 
+  match !i with 
+  |InfoFun (n, t, bltl) -> 
+    begin
+      if not (List.mem_assoc lt bltl) then
+        None
+      else 
+        Some (List.assoc lt bltl)
+    end
+  | _ -> failwith "chercher signature pas sur un info Fun"
+
 
  let modifier_type_fonction_info t tp i =
        match !i with

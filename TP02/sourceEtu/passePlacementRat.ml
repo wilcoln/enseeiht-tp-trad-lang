@@ -14,13 +14,12 @@ struct
  
     
 
-(* analyse_placement_instruction : AstType.instruction ->  -> AstPlacement.instruction *)
+(* analyse_placement_instruction : AstType.instruction -> AstPlacement.instruction *)
 (* Paramètre i : l'instruction à analyser *)
 (* Paramètre dep: déplacement *)
 (* Paramètre base : registre SB ou LB *)
-(* Vérifie la bonne utilisation de la mémoire et tranforme l'instruction
-en une instruction de type AstPlacement.instruction *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Modifie l'information d'adressage des variables déclarées dans l'instruction et
+renvoie un couple contenant l'instruction et  taille des variables déclaréees dans l'instruction *)
 let rec analyse_placement_instruction dep base i =
   match i with
   | AstType.Declaration (_, ia) ->
@@ -49,9 +48,9 @@ let rec analyse_placement_instruction dep base i =
 
 (* analyse_placement_bloc : AstType.bloc -> AstPlacement.bloc *)
 (* Paramètre li : liste d'instructions à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme le bloc
-en un bloc de type AstPlacement.bloc *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Paramètre dep: déplacement *)
+(* Paramètre base : registre SB ou LB *)
+(* Analyse toutes les instructions du bloc *)
 and analyse_placement_bloc dep base li =
   match li with
   | [] -> ()
@@ -62,6 +61,9 @@ and analyse_placement_bloc dep base li =
     end
 
 
+(* analyse_placement_parametres : AstType.parametres -> AstPlacement.parametres *)
+(* Paramètre lpia : liste des infos_ast sur les paramètres *)
+(* Modifie l'information d'adressage associées aux paramètres et renvoie la taille totale des paramètres *)
 let rec analyse_placement_parametres lpia = 
   match lpia with
   | [] -> 0
@@ -78,7 +80,11 @@ let rec analyse_placement_parametres lpia =
       | _ -> raise ErreurInterne
      end
 
-(* analyse_placement_fonction : AstType.fonction -> AstPlacement.fonction *)
+
+(* analyse_placement_fonction: AstType.fonction-> AstPlacement.fonction*)
+(* Paramètre fonction : la fonction à analyser *)
+(* Analyse les paramètres et le bloc de la fonction
+Renvoie  *)
 let analyse_placement_fonction fonction = 
   match fonction with 
   | AstType.Fonction(ia,lpia,li,e) ->
@@ -87,13 +93,16 @@ let analyse_placement_fonction fonction =
       let _ = analyse_placement_bloc 3 "LB" li in
       match info_ast_to_info ia with
       | InfoFun(_, t, _) -> (getTaille t, Fonction(ia, lpia, li, e))
-      | _ -> failwith "error analyse placement fonction"
+      | _ -> raise ErreurInterne
     end
-  | _ -> (0, Empty)
+  | AstType.Empty -> (0, Empty)
 
-(* analyser : AstType.ast -> AstPlacement.ast *)
+
+(* analyser : AstType.programme -> AstPlacement.programme *)
+(* Paramètre : le programme à analyser *)
+(* Analyse le premier bloc de fonctions, le programme puis le deuxième bloc de fonctions et tranforme le programme
+en un programme de type AstType.programme *)
 let analyser (AstType.Programme (lf1 ,prog, lf2)) =
-  (*let (taillesFonctions, nFonctions) = List.split (analyse_placement_fonctions 0 "SB" fonctions) in*)
   let (_, nlf1) = List.split(List.map (analyse_placement_fonction) lf1) in 
   let (_, nlf2) = List.split(List.map (analyse_placement_fonction) lf2) in
   let _ = analyse_placement_bloc 0 "SB" prog in

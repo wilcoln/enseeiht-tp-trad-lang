@@ -16,8 +16,7 @@ struct
 (* Paramètre a: l'affectable à analyser *)
 (* Vérifie la bonne utilisation du type et tranforme l'affectable
 en un affectable de type AstType.affectable et renvoie aussi le type de l'affectable *)
-(* Erreur si mauvais utilisation du type *)
-
+(* Erreur si problème de typage *)
 let rec analyse_type_affectable a = 
   match a with 
   | AstTds.Ident (ia) -> 
@@ -35,11 +34,12 @@ let rec analyse_type_affectable a =
       | _ -> raise DereferencementNonPointeur
     end
 
+
 (* analyse_type_expression : AstTds.expression -> AstType.expression *)
 (* Paramètre e : l'expression à analyser *)
 (* Vérifie la bonne utilisation du type et tranforme l'expression
-en un expression de type AstType.expression et renvoie aussi le type de l'expression *)
-(* Erreur si mauvais utilisation du type *)
+en une expression de type AstType.expression , renvoie aussi le type de l'expression *)
+(* Erreur si problème de typage *)
 let rec analyse_type_expression  e = 
   match e with
     | AstTds.AppelFonction (ia, le) -> 
@@ -49,16 +49,30 @@ let rec analyse_type_expression  e =
               begin
                 (* On analyse le type des arguments de l'appel *)
                 let nle = List.map analyse_type_expression le in 
-                (* On récupère la liste des signatures (surcharges) de la fonction *)
-                let ltl = fst (List.split bltl) in 
-                (* On récupère la liste des types des arguments *)
+                (* On récupère la liste des types des expressions passées en arguments *)
                 let lte = fst (List.split nle) in
                 (* On regarde si les arguments sont compatibles avec une des surcharges de la fonction *)
-                let compatibilite = List.fold_right (fun lt tq -> tq || (est_compatible_list lt lte)) ltl false in 
-                  if compatibilite then
-                    (t, AppelFonction (ia, snd (List.split nle), lte))
-                  else
+                match chercher_signature lte ia with 
+                | None -> 
+                  begin 
+                    (* Aucune signature n'est compatible *)
+                    (* On récupère la liste des signatures (surcharges) de la fonction *)
+                    let ltl = fst (List.split bltl) in 
+                    (* On lève une exception TypesParamètresInattendus *)
                     raise (TypesParametresInattendus (ltl, lte))
+                  end
+                | Some impl -> 
+                  begin 
+                    (* Il existe une signature compatible *)
+                    if impl then 
+                      (* Si elle est implémentée on crée une nouvelle expression 
+                      et on la renvoie avec son type *)
+                      (t, AppelFonction (ia, snd (List.split nle), lte))
+                    else 
+                      (* Sinon on lève une exception fonction non implémentée *)
+                      raise (FonctionNonImplementee (n, lte)) 
+                  end
+                   
               end
            | _ -> raise ErreurInterne
          end
@@ -108,16 +122,15 @@ let rec analyse_type_expression  e =
             begin
               match t2, t3 with 
               | Int, Int -> (String, SousChaine (ne1, ne2, ne3))
-              | _ -> raise (TypesInattendus ([Int; Int], [t1; t2]))
+              | _ -> raise (TypesInattendus ([Int; Int], [t2; t3]))
             end
-          else raise (TypeInattendu (t1, String))
-          
+          else raise (TypeInattendu (t1, String))  
         end
     | AstTds.Longueur e -> 
         begin 
           let (te, ne) = analyse_type_expression e in 
-          if est_compatible String te 
-            then (Int, Longueur (ne)) 
+          if est_compatible String te then 
+            (Int, Longueur (ne)) 
           else raise (TypeInattendu (te, String))
         end
     | AstTds.Binaire (op_binaire, e1, e2) ->
@@ -169,7 +182,7 @@ let rec analyse_type_expression  e =
 (* Paramètre i : l'instruction à analyser *)
 (* Vérifie la bonne utilisation du type et tranforme l'instruction
 en un instruction de type AstType.instruction et renvoie aussi le type de l'instruction *)
-(* Erreur si mauvais utilisation du type *)
+(* Erreur si problème de typage *)
 let rec analyse_type_instruction  i =
   match i with
   | AstTds.Declaration (t, e, ia) ->
@@ -200,6 +213,7 @@ let rec analyse_type_instruction  i =
           | Rat -> AffichageRat ne
           | Bool -> AffichageBool ne
           | String -> AffichageString ne
+          | Pointeur (tp) -> raise (TypeNonAutoriseIci(Pointeur(tp)))
           | _ -> raise TypeIndefini
         end
   | AstTds.Conditionnelle (c, bthen,belse) -> 
@@ -227,14 +241,19 @@ let rec analyse_type_instruction  i =
 (* Analyse chaque instruction de la liste li *)
 and analyse_type_bloc li = List.map (analyse_type_instruction ) li
 
+
+(* analyse_type_parametre : AstTds.parametre -> AstType.parametre *)
+(* Paramètre (ptype, pia) : le paramètre à analyser, son type et son info_ast *)
+(* Modifie le type contenu dans l'info_ast et renvoie le nouveau couple *)
 let analyse_type_parametre (ptype, pia) = 
   modifier_type_info ptype pia;
   (ptype, pia) 
 
+
 (* analyse_type_fonction : AstTds.fonction -> AstType.fonction *)
 (* Appel analyse type des paramètres, des instructions, modifie le type de la fonction
  et tranforme la fonction en une fonction de type AstType.fonction *)
-(* Erreur si mauvaise utilisation des types  *)
+(* Erreur si problèmes de typage  *)
 let rec analyse_type_fonction fonction =
   match fonction with 
   | AstTds.Fonction(t,ia,lp,li,e) -> 
@@ -248,14 +267,14 @@ let rec analyse_type_fonction fonction =
         else 
           raise (TypeInattendu (texp, t))
       end
+  (* Suppression des noeuds des prototypes devenus inutiles*)
   | AstTds.Prototype(ia) -> Empty
   
 
-(* analyser : AstTds.ast -> AstType.ast *)
+(* analyser : AstTds.programme -> AstType.programme *)
 (* Paramètre : le programme à analyser *)
-(* Vérifie la bonne utilisation du type et tranforme le programme
-en un programme de type AstType.programme et renvoie aussi le type de le programme *)
-(* Erreur si mauvais utilisation du type *)
+(* Analyse le premier bloc de fonctions, le programme puis le deuxième bloc de fonctions et tranforme le programme
+en un programme de type AstType.programme *)
 let analyser (AstTds.Programme (lf1, prog, lf2)) =
   let nlf1 = List.map analyse_type_fonction lf1 in 
   let nbloc = List.map analyse_type_instruction prog in

@@ -2,19 +2,26 @@ open Type
 open Ast.AstSyntax
 
 (* Exceptions pour la gestion des identificateurs *)
+
 exception DoubleDeclaration of string 
-exception DoubleDeclarationPrototype of string
+exception DoubleDeclarationSignature of string * typ list
 exception IdentifiantNonDeclare of string 
 exception MauvaiseUtilisationIdentifiant of string 
 
 (* Exceptions pour le typage *)
+
 (* Le premier type est le type réel, le second est le type attendu *)
 exception TypeInattendu of typ * typ
 exception TypesParametresInattendus of typ list list * typ list
 exception TypeBinaireInattendu of binaire * typ * typ (* les types sont les types réels non compatible avec les signatures connues de l'opérateur *)
 exception TypeIndefini
+exception TypeNonAutoriseIci of typ
 exception TypesInattendus of typ list * typ list
+exception FonctionNonImplementee of string * typ list
 exception DereferencementNonPointeur (** On essaie de déréferencer un non pointeur*)
 
-(* Exceptions générique *)
-exception ErreurInterne (** cette exception est lancée si on entre dans un cas impossible à accéder normalement. *)
+(* Exceptions génériques *)
+
+(* cette exception est lancée si on accède à un cas normalement impossible car déjà filtré par les passes précédentes. *)
+exception ErreurInterne 
+
