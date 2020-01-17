@@ -1,0 +1,5 @@
+main{
+    int * px = (new int);
+    bool x = true;
+    px = &x;
+}

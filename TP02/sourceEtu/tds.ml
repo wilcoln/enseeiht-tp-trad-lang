@@ -6,7 +6,7 @@ type info =
   | InfoConst of string * int
   | InfoVar of string * typ * int * string
   | InfoFun of string * typ * (typ list * bool) list 
-  (** double list pour prendre en compte plusieurs signatures, 
+  (** list pour prendre en compte plusieurs signatures,
   le booléan associé à une signature indique si elle est implémentée ou pas *)
 
 (* Données stockées dans la tds  et dans les AST : pointeur sur une information *)

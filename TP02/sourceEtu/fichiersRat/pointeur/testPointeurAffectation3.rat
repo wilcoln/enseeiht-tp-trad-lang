@@ -1,0 +1,3 @@
+main{
+    bool * px = (new int);
+}

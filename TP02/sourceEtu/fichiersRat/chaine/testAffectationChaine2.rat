@@ -1,0 +1,3 @@
+test{
+  string x = 8;
+}

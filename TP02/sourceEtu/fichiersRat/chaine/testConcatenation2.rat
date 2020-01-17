@@ -1,0 +1,4 @@
+test{
+  string x = "Bonjour";
+  string z = (x ^ 13);
+}

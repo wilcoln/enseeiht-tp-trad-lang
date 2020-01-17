@@ -215,3 +215,34 @@ let%test "test6_z1" =
     
   let%test "test12_f_i" = 
     test "../../fichiersRat/src-rat-placement-test/test12.rat"  "f" ("i",1)  (-1, "LB")
+
+
+
+  (****************************
+      Nouveaux tests Placement
+    ***************************)
+
+(* Fichiers de tests de l'intégration des pointeurs -> doivent passer de placement *)
+
+let%test "testPointeurAffectation1" =
+  test "../../fichiersRat/pointeur/testPointeurAffectation1.rat"  "main" ("px",1)  (0,"SB")
+
+let%test "testAccesPointeur1" =
+test "../../fichiersRat/pointeur/testAccesPointeur1.rat"  "main" ("y",1)  (2,"SB")
+
+
+
+(* Fichiers de tests de l'intégration de la surchage -> doivent passer de placement *)
+
+let%test "testSurchargeComplet_x" =
+test "../../fichiersRat/surcharge/testSurchargeComplet.rat"  "main" ("x",1)  (0,"SB")
+
+let%test "testSurchargeComplet_y" =
+test "../../fichiersRat/surcharge/testSurchargeComplet.rat"  "main" ("y",1)  (1,"SB")
+
+
+let%test "testSurchargeComplet_f_param1" =
+test "../../fichiersRat/surcharge/testSurchargeComplet.rat"  "f" ("i1",1)  (-2,"LB")
+
+let%test "testSurchargeComplet_f_param2" =
+test "../../fichiersRat/surcharge/testSurchargeComplet.rat"  "f" ("i2",1)  (-1,"LB")

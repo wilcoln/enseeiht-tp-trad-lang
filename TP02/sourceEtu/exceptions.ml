@@ -15,7 +15,7 @@ exception TypeInattendu of typ * typ
 exception TypesParametresInattendus of typ list list * typ list
 exception TypeBinaireInattendu of binaire * typ * typ (* les types sont les types réels non compatible avec les signatures connues de l'opérateur *)
 exception TypeIndefini
-exception TypeNonAutoriseIci of typ
+exception TypeNonAutorise of typ
 exception TypesInattendus of typ list * typ list
 exception FonctionNonImplementee of string * typ list
 exception DereferencementNonPointeur (** On essaie de déréferencer un non pointeur*)

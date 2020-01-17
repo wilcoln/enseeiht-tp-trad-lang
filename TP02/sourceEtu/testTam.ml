@@ -135,22 +135,49 @@ let%expect_test "factrec" =
   runtam "../../fichiersRat/src-rat-tam-test/factrec.rat";
   [%expect{| 120 |}]
 
-  let%expect_test "pointeurs" =
-  runtam "../../fichiersRat/testPointeurs.rat";
 
-  [%expect{| [1/2]5 |}]
+  (***********************
+      Nouveaux tests Tam
+   ***********************)
 
-let%expect_test "chaines" =
-  runtam "../../fichiersRat/testChaines.rat";
+
+(* Fichiers de tests de l'intégration des chaines -> doivent passer de generation de code *)
+
+let%expect_test "testPrintChainesRetour" =
+  runtam "../../fichiersRat/chaine/testChainesPrintRetour.rat";
+
+  [%expect{| Retour |}]
+
+let%expect_test "testPrintChaineComplique" =
+  runtam "../../fichiersRat/chaine/testChainesComplet.rat";
 
   [%expect{| aebfcgdh |}]
 
+
+(* Fichiers de tests de l'intégration des pointeurs -> doivent passer de generation de code *)
+
+let%expect_test "pointeurs" =
+runtam "../../fichiersRat/pointeur/testPointeursComplet.rat";
+
+[%expect{| [1/2]5 |}]
+
+
+(* Fichiers de tests de l'intégration des surcharges -> doivent passer de generation de code *)
+
 let%expect_test "surcharge" =
-  runtam "../../fichiersRat/testSurcharge.rat";
+  runtam "../../fichiersRat/surcharge/testSurchargeComplet.rat";
 
   [%expect{| 12 |}]
 
-let%expect_test "code_prototype" = 
-  runtam "../../fichiersRat/testPrototype.rat";
+
+(* Fichiers de tests de l'intégration des prototypes -> doivent passer de generation de code *)
+
+let%expect_test "code_prototype" =
+  runtam "../../fichiersRat/prototype/testPrototypeComplet.rat";
 
   [%expect{| 5[2/3] |}]
+
+
+ let%expect_test "code_tres_complique" =
+    runtam "../../fichiersRat/src-rat-tam-test/integration.rat";
+  [%expect{| aebfcgdh |}]

@@ -341,14 +341,82 @@ let%test_unit "code_testfuns" =
 
 let%test_unit "code_complique" = 
   let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
- 
-(* Fichiers de tests de l'intégration des pointeurs -> doivent passer la TDS *)
 
-let%test_unit "code_pointeurs" = 
-  let _ = compiler   "../../fichiersRat/testPointeurs.rat" in ()
 
-let%test_unit "code_surcharge" = 
-  let _ = compiler   "../../fichiersRat/testSurcharge.rat" in ()
+   (**********************
+       Nouveaux tests TDS
+     *********************)
 
-let%test_unit "code_protototype" = 
-  let _ = compiler   "../../fichiersRat/testPrototype.rat" in ()
+
+  (* Fichiers de tests de l'intégration des chaines -> doivent passer la TDS *)
+  let%test_unit "testAffectationChaine" =
+    let _ = compiler "../../fichiersRat/chaine/testAffectationChaine.rat" in ()
+
+  let%test_unit "testConcatenation" =
+    let _ = compiler "../../fichiersRat/chaine/testConcatenation.rat" in ()
+
+  let%test_unit "testLongueur" =
+    let _ = compiler "../../fichiersRat/chaine/testLongueur.rat" in ()
+
+  let%test_unit "testSousChaine1" =
+    let _ = compiler "../../fichiersRat/chaine/testSousChaine1.rat" in ()
+
+
+  (* Fichiers de tests de l'intégration des pointeurs -> doivent passer la TDS *)
+
+  let%test_unit "testPointeursComplet" =
+  let _ = compiler   "../../fichiersRat/pointeur/testPointeursComplet.rat" in ()
+
+
+
+
+  (* Fichiers de tests de l'intégration de la surcharge -> doivent passer la TDS *)
+
+  let%test_unit "testSurchargeComplet" =
+    let _ = compiler   "../../fichiersRat/surcharge/testSurchargeComplet.rat" in ()
+
+
+
+
+  (* Fichiers de tests de l'intégration des prototypes -> doivent passer la TDS *)
+
+  let%test_unit "testPrototypeComplet" =
+    let _ = compiler   "../../fichiersRat/prototype/testPrototypeComplet.rat" in ()
+
+  let%test_unit "testDeuxImplementation" =
+  try
+    let _ = compiler "../../fichiersRat/prototype/testDeuxImplementation.rat"
+    in raise ErreurNonDetectee
+  with
+  | DoubleDeclaration("f") -> ()
+
+  let%test_unit "testDeuxPrototypes" =
+    let _ = compiler "../../fichiersRat/prototype/testDeuxPrototypes.rat" in ()
+
+
+  let%test_unit "testFonctionSansCorps" =
+  try
+    let _ = compiler   "../../fichiersRat/prototype/testFonctionSansCorps.rat" in ()
+  with
+  | FonctionNonImplementee("f2",_) -> ()
+
+  let%test_unit "testMauvaiseSignature1" =
+    try
+    let _ = compiler "../../fichiersRat/prototype/testMauvaiseSignature1.rat" in ()
+  with
+  | FonctionNonImplementee("f2",_) -> ()
+  let%test_unit "testMauvaiseSignature1bis" =
+    try
+    let _ = compiler "../../fichiersRat/prototype/testMauvaiseSignature1bis.rat" in ()
+  with
+  | FonctionNonImplementee("g",_) -> ()
+  let%test_unit "testMauvaiseSignature2" =
+    try
+    let _ = compiler "../../fichiersRat/prototype/testMauvaiseSignature2.rat" in ()
+  with
+  | FonctionNonImplementee("f",_) -> ()
+  let%test_unit "testMauvaiseSignature2bis" =
+    try
+    let _ = compiler "../../fichiersRat/prototype/testMauvaiseSignature2bis.rat" in ()
+  with
+  | FonctionNonImplementee("f2",_) -> ()

@@ -524,13 +524,134 @@ let _ = compiler   "../../fichiersRat/src-rat-tam-test/testfuns.rat" in ()
 let%test_unit "code_complique" = 
 let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
 
+
+  (***********************
+      Nouveaux tests Type
+    **********************)
+
 (* Fichiers de tests de l'intégration des pointeurs -> doivent passer le typage *)
 
-let%test_unit "code_pointeurs" = 
-  let _ = compiler   "../../fichiersRat/testPointeurs.rat" in ()
+let%test_unit "testAffectationChaine1" =
+let _ = compiler   "../../fichiersRat/chaine/testAffectationChaine1.rat" in ()
 
-(* Fichiers de tests de l'intégration des chaines -> doivent passer lae *)
-let%test_unit "code_string" = 
-let _ = compiler   "../../fichiersRat/testChaines.rat" in ()
-let%test_unit "code_protototype" = 
-let _ = compiler   "../../fichiersRat/testPrototype.rat" in ()
+let%test_unit "testAffectationChaine2"=
+  try
+    let _ = compiler "../../fichiersRat/chaine/testAffectationChaine2.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu (Int, String)  -> ()
+
+let%test_unit "testConcatenation1" =
+let _ = compiler   "../../fichiersRat/chaine/testConcatenation1.rat" in ()
+
+let%test_unit "testConcatenation2"=
+  try
+    let _ = compiler "../../fichiersRat/chaine/testConcatenation2.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeBinaireInattendu(Concat, String, Int)  -> ()
+
+let%test_unit "testLongueur1" =
+let _ = compiler   "../../fichiersRat/chaine/testLongueur1.rat" in ()
+
+let%test_unit "testLongueur2"=
+  try
+    let _ = compiler "../../fichiersRat/chaine/testLongueur2.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu (Int, String)  -> ()
+
+let%test_unit "testLongueur3"=
+  try
+    let _ = compiler "../../fichiersRat/chaine/testLongueur3.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu (Int, String)  -> ()
+
+let%test_unit "testSousChaine1" =
+let _ = compiler   "../../fichiersRat/chaine/testSousChaine1.rat" in ()
+
+let%test_unit "testSousChaine2"=
+  try
+    let _ = compiler "../../fichiersRat/chaine/testSousChaine2.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypesInattendus ([Int; Int], [Bool; Int])  -> ()
+
+let%test_unit "testSousChaine3"=
+  try
+    let _ = compiler "../../fichiersRat/chaine/testSousChaine3.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypesInattendus ([Int; Int], [Int; Rat])  -> ()
+
+let%test_unit "testSousChaine4"=
+  try
+    let _ = compiler "../../fichiersRat/chaine/testSousChaine4.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu (Bool, String) -> ()
+
+
+(* Fichiers de tests de l'intégration des pointeurs -> doivent passer le typage *)
+
+let%test_unit "testAccesPointeur1" =
+let _ = compiler   "../../fichiersRat/pointeur/testAccesPointeur1.rat" in ()
+
+let%test_unit "testAccesPointeur2" =
+  try
+    let _ = compiler   "../../fichiersRat/pointeur/testAccesPointeur2.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Int,Bool) -> ()
+
+let%test_unit "testAccesPointeur3" =
+  try
+    let _ = compiler   "../../fichiersRat/pointeur/testAccesPointeur3.rat"
+    in raise ErreurNonDetectee
+  with
+  | DereferencementNonPointeur -> ()
+
+let%test_unit "testPointeurAdresse1" =
+let _ = compiler   "../../fichiersRat/pointeur/testPointeurAdresse1.rat" in ()
+
+let%test_unit "testPointeurAdresse2" =
+  try
+    let _ = compiler   "../../fichiersRat/pointeur/testPointeurAdresse2.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(_,_) -> ()
+
+let%test_unit "testPointeurAdresse3" =
+  try
+    let _ = compiler   "../../fichiersRat/pointeur/testPointeurAdresse3.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(_,_) -> ()
+
+let%test_unit "testPointeurAffectation1" =
+let _ = compiler   "../../fichiersRat/pointeur/testPointeurAffectation1.rat" in ()
+
+let%test_unit "testPointeurAffectation2" =
+  try
+    let _ = compiler   "../../fichiersRat/pointeur/testPointeurAffectation2.rat"
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(_,_) -> ()
+
+let%test_unit "testPointeurAffectation3" =
+try
+  let _ = compiler   "../../fichiersRat/pointeur/testPointeurAffectation3.rat"
+   in raise ErreurNonDetectee
+with
+| TypeInattendu(_,_) -> ()
+
+let%test_unit "testAffichagePointeur" =
+try
+  let _ = compiler   "../../fichiersRat/pointeur/testAffichagePointeur.rat"
+   in raise ErreurNonDetectee
+with
+| TypeNonAutorise(Pointeur(_)) -> ()
+
+let%test_unit "code_pointeurs" =
+  let _ = compiler   "../../fichiersRat/pointeur/testPointeursComplet.rat" in ()

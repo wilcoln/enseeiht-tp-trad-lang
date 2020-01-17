@@ -1,0 +1,4 @@
+main{
+    int px = 3;
+    int y = (*px);
+}

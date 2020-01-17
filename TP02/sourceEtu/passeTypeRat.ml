@@ -49,7 +49,7 @@ let rec analyse_type_expression  e =
               begin
                 (* On analyse le type des arguments de l'appel *)
                 let nle = List.map analyse_type_expression le in 
-                (* On récupère la liste des types des expressions passées en arguments *)
+                (* On récupère la liste des types des arguments *)
                 let lte = fst (List.split nle) in
                 (* On regarde si les arguments sont compatibles avec une des surcharges de la fonction *)
                 match chercher_signature lte ia with 
@@ -213,7 +213,7 @@ let rec analyse_type_instruction  i =
           | Rat -> AffichageRat ne
           | Bool -> AffichageBool ne
           | String -> AffichageString ne
-          | Pointeur (tp) -> raise (TypeNonAutoriseIci(Pointeur(tp)))
+          | Pointeur (tp) -> raise (TypeNonAutorise(Pointeur(tp)))
           | _ -> raise TypeIndefini
         end
   | AstTds.Conditionnelle (c, bthen,belse) -> 

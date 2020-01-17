@@ -2,6 +2,7 @@
 
 %{
 
+open Utils
 open Type
 open Ast.AstSyntax
 %}
@@ -65,8 +66,6 @@ open Ast.AstSyntax
 main : lfi = prog EOF     {lfi}
 
 prog :
-    (*| lf = fonc  lfi = prog   {let (Programme (lf1,li))=lfi in (Programme (lf::lf1,li))}
-    | ID li = bloc            {Programme ([],li)}*)
     | ldfs1=dfs ID li=bloc ldfs2=dfs {Programme(ldfs1,li,ldfs2)}
 
 dfs :                   
@@ -111,7 +110,7 @@ e :
 | TRUE                    {True}
 | FALSE                   {False}
 | e=ENTIER                {Entier e}
-| s=CHAINE                {Chaine (String.sub s 1 ((String.length s)-2))}
+| s=CHAINE                {Chaine (trim_rat_str s)}
 | PO e1=e AO e2=e VIRG e3=e AF PF {SousChaine (e1,e2,e3)}
 | LENGTH e1=e             {Longueur (e1)}
 | PO e1=e PLUS e2=e PF    {Binaire (Plus,e1,e2)}
@@ -119,7 +118,7 @@ e :
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
 | PO e1=e CARAT e2=e PF   {Binaire (Concat,e1,e2)}
-| a1=a                    {Affectable (a1)} (* TODO revenir dessus *)
+| a1=a                    {Affectable (a1)}
 | NULL                    {Null}
 | PO NEW tp=typ PF        {New (tp)}
 | AMP n=ID                {Adresse (n)}

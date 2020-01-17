@@ -1,0 +1,10 @@
+int h (int a int b int c);
+
+int h (int a int b){
+    return (a+b);
+}
+
+main {
+    int x = call h (2 3);
+    print x;
+}

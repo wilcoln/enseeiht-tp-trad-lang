@@ -1,0 +1,5 @@
+test{
+  string x = "Bonjour";
+  string y = " Madame";
+  string z = (x ^ y);
+}

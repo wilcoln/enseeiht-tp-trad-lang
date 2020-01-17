@@ -1,0 +1,11 @@
+int f (int a int b int c){
+    return (a+b);
+}
+
+main {
+    int x = call f (2 3);
+    print x;
+}
+
+int f (int a int b);
+
